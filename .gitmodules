@@ -1,0 +1,3 @@
+[submodule "support/libdft"]
+	path = support/libdft
+	url = https://git.cs.vu.nl/r.vermeulen/libdft.git

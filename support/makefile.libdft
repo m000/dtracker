@@ -1,0 +1,22 @@
+include makefile.vars
+
+LIBDFT_ARCH = $(firstword $(shell ls -t libdft-*.tar.gz))
+LIBDFT_SRC = libdft/src
+
+.PHONY: all
+all: libdft
+
+.PHONY: libdft
+libdft: $(LIBDFT_SRC)
+	cd $< && CXXFLAGS=-DCUSTOM_TAGS_FDOFFSET make
+
+#$(LIBDFT_SRC):
+#mkdir -p libdft
+#cd libdft && tar -zxvf ../$(LIBDFT_ARCH)
+#$(RM) -rf libdft
+
+.PHONY: clean
+clean: $(LIBDFT_SRC)
+	cd $< && make clean
+
+# vim: ai:ts=4:sw=4:et!:ft=make
