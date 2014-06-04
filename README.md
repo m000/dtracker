@@ -86,7 +86,11 @@ If you were able to produce any good-looking provenance graph, we'd love to inco
 
 Sample programs
 ----------------
-In this repository we plan to also include the sample programs we used for evaluating the effectiveness of DataTracker. ETA: mid-April 2014. 
+In this repository also include a few sample programs we used for evaluating the effectiveness of DataTracker. You can find these programs in the ``samples`` directory. To build them, use:
+
+```
+make -C samples
+```
 
 
 [pin]: http://software.intel.com/en-us/articles/pin-a-dynamic-binary-instrumentation-tool
