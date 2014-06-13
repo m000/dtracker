@@ -6,7 +6,7 @@ About
 DataTracker is a tool for collecting high-fidelity data provenance from unmodified Linux programs. It is based on [Intel Pin][pin] _Dynamic Binary Instrumentation_ framework and [libdft][libdft] _Dynamic Taint Analysis_ library. The taint marks supported by the original libdft are of limited size and cannot provide adequate fidelity for use in provenance tracking. For this, DataTracker uses a [modified version][libdft-mod] of the library developed at [VU University Amsterdam][vu-cs].
 
 DataTracker was developed at VU University Amsterdam by Manolis Stamatogiannakis and presented at IPAW14.
-You can get a [copy of the paper][paper-dare] from VU Digital Archive Repository ([VU-DARE][vu-dare]).
+You can get a [copy of the paper][dtracker-dare] from VU Digital Archive Repository ([VU-DARE][vu-dare]).
 We also have a [demo on YouTube][ipaw14-demo].
 Presentation slides available upon request.
 
