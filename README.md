@@ -5,7 +5,10 @@ About
 ------
 DataTracker is a tool for collecting high-fidelity data provenance from unmodified Linux programs. It is based on [Intel Pin][pin] _Dynamic Binary Instrumentation_ framework and [libdft][libdft] _Dynamic Taint Analysis_ library. The taint marks supported by the original libdft are of limited size and cannot provide adequate fidelity for use in provenance tracking. For this, DataTracker uses a [modified version][libdft-mod] of the library developed at [VU University Amsterdam][vu-cs].
 
-DataTracker was developed at VU University Amsterdam by Manolis Stamatogiannakis.
+DataTracker was developed at VU University Amsterdam by Manolis Stamatogiannakis and presented at IPAW14.
+You can get a [copy of the paper][paper-dare] from VU Digital Archive Repository ([VU-DARE][vu-dare]).
+We also have a [demo on YouTube][ipaw14-demo].
+Presentation slides available upon request.
 
 Requirements
 -------------
@@ -15,6 +18,8 @@ DataTracker runs on 32bit Linux systems. This limitation is imposed by the curre
 *  A recent (>=2.13) version of Intel Pin. The framework must be present in directory ``pin`` inside the DataTracker top directory.
 *  A suitable version of the [modified libdft][libdft-mod] - typically the latest available. This must be placed in directory ``support/libdft``.
 *  Python 2.7 for converting raw provenance to [PROV][prov] format in [Turtle][turtle] syntax.
+
+
 
 Installation
 -------------
@@ -103,3 +108,7 @@ make -C samples
 [prov]: http://www.w3.org/TR/2013/NOTE-prov-overview-20130430/
 [provconvert]: https://github.com/lucmoreau/ProvToolbox/wiki/provconvert
 [provtoolbox]: https://github.com/lucmoreau/ProvToolbox/wiki/ProvToolbox-Home
+[ipaw14-demo]: https://www.youtube.com/watch?v=BD0h6M5mVoo
+[vu-dare]: http://dare.ubvu.vu.nl/
+[dtracker-dare]: http://dare.ubvu.vu.nl/handle/1871/51386
+
