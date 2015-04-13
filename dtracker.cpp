@@ -74,7 +74,7 @@ static KNOB<string> TrackStderr(KNOB_MODE_WRITEONCE, "pintool", "stderr",
  */
 static void ImageLoad(IMG img, VOID * v) {
 	// TODO: check if this works correctly when execv() is used.
-    if (IMG_IsMainExecutable(img)) {
+	if (IMG_IsMainExecutable(img)) {
 		exename = path_resolve(IMG_Name(img).c_str());
 		PROVLOG_EXEC(exename);
 
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 
 	// Open raw prov file.
 	// This file is to be post-processed to get the data in a proper format.
-    rawProvStream.open(ProvRawKnob.Value().c_str());
+	rawProvStream.open(ProvRawKnob.Value().c_str());
 
 
 	/*
