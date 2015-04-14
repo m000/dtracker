@@ -3,17 +3,13 @@
 # Converter from our custom raw provenance output to SPADE DSL format.
 # See: https://code.google.com/p/data-provenance/wiki/Pipe
 
-from raw2ttl import *
+from raw2ttl import RawConverter
+from raw2ttl import UnknownUFDError
+import argparse
+import fileinput
+from operator import itemgetter
+from textwrap import dedent
 
-# from abc import ABCMeta
-
-# import argparse
-# import sys
-# import fileinput
-# import string
-# import urllib
-# import inspect
-# from textwrap import dedent
 # from pprint import pprint
 
 # type:<Agent|Process|Artifact> id:<unique identifier> <key>:<value> ... <key>:<value>
