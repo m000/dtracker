@@ -112,8 +112,8 @@ static inline void PROVLOG_OPEN(const ufd_t ufd, const std::string & fdname, con
 static inline void PROVLOG_CLOSE(const ufd_t ufd) {
 	rawProvStream << "c:ufd" << ufd << std::endl;
 }
-static inline void PROVLOG_EXEC(const std::string & exename) {
-	rawProvStream << "x:" << exename << std::endl;
+static inline void PROVLOG_EXEC(const std::string & exename, pid_t pid) {
+	rawProvStream << "x:" << pid << ":" << exename << std::endl;
 }
 static inline void PROVLOG_WRITE_RANGE(const ufd_t ofd, const off_t write_begin, const range_map_t::key_type last, const range_map_t::mapped_type & info) {
 	switch(info.type) {

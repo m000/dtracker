@@ -45,10 +45,12 @@ off_t stdcount[STDFD_MAX];
 /* Raw provenance output stream. */
 std::ofstream rawProvStream;
 
-/* Current executable name.
- * TODO: Check if this works correctly while following execv().
+/* Current executable name and pid.
+ * XXX: Check if this works correctly while following execv().
  */
 std::string exename("N/A");
+pid_t pid;
+
 
 /* Pin knob for setting the raw prov output file */
 static KNOB<string> ProvRawKnob(KNOB_MODE_WRITEONCE, "pintool", "o",
@@ -73,10 +75,11 @@ static KNOB<string> TrackStderr(KNOB_MODE_WRITEONCE, "pintool", "stderr",
  * Currently only acts when the main executable is loaded to set exename global.
  */
 static void ImageLoad(IMG img, VOID * v) {
-	// TODO: check if this works correctly when execv() is used.
+	// XXX: check if this works correctly when execv() is used.
 	if (IMG_IsMainExecutable(img)) {
-		exename = path_resolve(IMG_Name(img).c_str());
-		PROVLOG_EXEC(exename);
+		exename = path_resolve(IMG_Name(img));
+		pid = getpid();
+		PROVLOG_EXEC(exename, pid);
 
 		// Add stdin/stdout/stderr to watched file descriptors.
 		// This should take place while loading the image in order to have 
