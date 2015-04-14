@@ -21,177 +21,171 @@ from raw2ttl import *
 
 
 
+#### SPADE DSL converter class ###################################
 class RawDSLConverter(RawConverter):
 	formats = {
-		'header': '',
-		'dsl_exec': dedent('''
-		    type:Process id:X program:<{url_program}> pid:X
+		'exec': dedent('''
+			type:Process id:{pid} program:{url_program} pid:X
 		''').strip(),
-		'dsl_open': dedent('''
-		    type:Artifact id:X file???:<{url_file}> a label???:"{label}"
+		'open': dedent('''
+			type:Artifact id:X file:{filename} label???:"{label}"
 		''').strip(),
-		'dsl_used': dedent('''
-		    type:Used from:<{url_program}> to:<{url_file}>
+		'used': dedent('''
+			type:Used from:{url_program} to:{filename}
 		''').strip(),
-		'dsl_derived': dedent('''
-		    type:WasDerivedFrom from:<{url_file1}> to:<{url_file2}>
+		'derived': dedent('''
+			type:WasDerivedFrom from:{filename1} o:{filename2}
 		''').strip(),
-		'dsl_generated': dedent('''
-		    type:wasGeneratedBy from:<url_program> to:<{url_file}>
+		'generated': dedent('''
+			type:wasGeneratedBy from:url_program to:{filename}
 		''').strip(),
 
 		# not used for now
-		'rdf_derived_range': dedent('''
-		    <{url_file1}{range1}> prov:wasDerivedFrom <{url_file2}{range2}> .
+		'derived_range': dedent('''
+			<{filename1}{range1}> prov:wasDerivedFrom <{filename2}{range2}> .
 		''').strip(),
-		'rdf_member': dedent('''
-		    <{url_file}> prov:hadMember <{url_file}{range}> .
+		'member': dedent('''
+			<{filename}> prov:hadMember <{filename}{range}> .
 		''').strip(),
 		'file_range': '#%d-%d',
 	}
 
 	def handle_c(self, data):
-	    # line format: c:<ufd>
-	    ufd = data
-	    filename1 = self.ufdmap[ufd]
+		ufd = itemgetter('ufd')(data)
+		filename1 = self.ufdmap[ufd]
 
-	    # print triples
-	    if ufd in self.derived:
-	        for filename2 in self.derived[ufd]:
-	            print self.format('dsl_derived',
-	                url_file1 = self.__class__.quote_file(filename1),
-	                url_file2 = self.__class__.quote_file(filename2),
-	            )
-	        del self.derived[ufd]
+		# print triples
+		if ufd in self.derived:
+			for filename2 in self.derived[ufd]:
+				print self.format('derived',
+					filename1 = self.__class__.quote_file(filename1),
+					filename2 = self.__class__.quote_file(filename2),
+				)
+			del self.derived[ufd]
 
-	    # cleanup generated
-	    if filename1 in self.generated: self.generated.remove(filename1)
+		# cleanup generated
+		if filename1 in self.generated: self.generated.remove(filename1)
 
 	def handle_g(self, data):
-	    # line format: g:<gen mode>:<program name>:<filename>
+		mode, exe, filename = itemgetter('mode', 'program', 'file')(data)
+		assert self.exe == exe, "Unexpected change to executable name. Expected %s. Got %s." % (self.exe, exe)
 
-	    mode, exename, filename = data.split(':');
-	    assert self.exe == exename, "Unexpected change to executable name. Expected %s. Got %s." % (self.exe, exename)
-
-	    if mode == 't' or mode == 'g':
-	        print self.format('dsl_generated',
-	            url_program = self.__class__.quote_file(self.exe),
-	            url_file = self.__class__.quote_file(filename),
-	        )
-	    else:
-	        #do not generate triple yet - it will be generated on first write
-	        self.generated.add(filename);
+		if mode == 't' or mode == 'g':
+			print self.format('generated',
+				url_program = self.__class__.quote_file(self.exe),
+				filename = self.__class__.quote_file(filename),
+			)
+		else:
+			#do not generate triple yet - it will be generated on first write
+			self.generated.add(filename);
 
 	def handle_o(self, data):
-	    # line format: o:<ufd>:<filename>
-	    ufd, filename = data.split(':')
-	    self.ufdmap[ufd] = filename
+		ufd, filename = itemgetter('ufd', 'file')(data)
+		self.ufdmap[ufd] = filename
 
-	    # print triple
-	    print self.format('dsl_open',
-	        url_file=self.__class__.quote_file(filename),
-	        label=filename
-	    )
+		print self.format('open',
+			filename = self.__class__.quote_file(filename),
+			label = filename
+		)
 
 	def handle_u(self, data):
-	    # line format: g:<program name>:<filename>
-	    exename, filename = data.split(':')
-	    assert self.exe == exename, "Unexpected change to executable name. Expected %s. Got %s." % (self.exe, exename)
+		exe, filename = itemgetter('program', 'file')(data)
+		assert self.exe == exe, "Unexpected change to executable name. Expected %s. Got %s." % (self.exe, exe)
 
-	    #print triple
-	    print self.format('dsl_used',
-	        url_program = self.__class__.quote_file(exename),
-	        url_file = self.__class__.quote_file(filename),
-	    )
+		print self.format('used',
+			url_program = self.__class__.quote_file(exe),
+			filename = self.__class__.quote_file(filename),
+		)
 
 	def handle_w(self, data):
-	    # line format: w:<range type>:<output ufd>:<output offset>:<origin ufd>:<origin offset>:<length>
-	    rtype, ufd, offset, ufd_origin, offset_origin, length = data.split(':', 5)
+		rtype, ufd, offset, origin_ufd, origin_offset, length = itemgetter(
+			'range_type', 'out_ufd', 'out_offset', 'origin_ufd', 'origin_offset', 'length'
+		)(data)
 
-	    if ufd not in self.ufdmap:
-	        raise UnknownUFDError(ufd)
-	    if ufd_origin not in self.ufdmap:
-	        raise UnknownUFDError(ufd_origin)
+		if ufd not in self.ufdmap:
+			raise UnknownUFDError(ufd)
+		if origin_ufd not in self.ufdmap:
+			raise UnknownUFDError(origin_ufd)
 
-	    filename = self.ufdmap[ufd]
-	    filename_origin = self.ufdmap[ufd_origin]
-	    offset = int(offset)
-	    offset_origin = int(offset_origin)
-	    length = int(length)
+		filename = self.ufdmap[ufd]
+		filename_origin = self.ufdmap[origin_ufd]
+		offset = int(offset)
+		origin_offset = int(origin_offset)
+		length = int(length)
 
-	    # emit generated triple if needed
-	    if filename in self.generated:
-	        print self.format('dsl_generated',
-	            url_program = self.__class__.quote_file(self.exe),
-	            url_file = self.__class__.quote_file(filename),
-	        )
-	        self.generated.remove(filename)
+		# emit generated triple if needed
+		if filename in self.generated:
+			print self.format('generated',
+				url_program = self.__class__.quote_file(self.exe),
+				filename = self.__class__.quote_file(filename),
+			)
+			self.generated.remove(filename)
 
-	    # simple file provenance
-	    if ufd in self.derived:
-	        self.derived[ufd].add(filename_origin)
-	    else:
-	        self.derived[ufd] = set([filename_origin])
+		# simple file provenance
+		if ufd in self.derived:
+			self.derived[ufd].add(filename_origin)
+		else:
+			self.derived[ufd] = set([filename_origin])
 
-	    # output ranges
-	    # dead block - minrange is currently always 0 for DSL output
-	    if self.minrange > 0 and length >= self.minrange:
-	        if rtype == 'SEQ':
-	            print self.format('rdf_member',
-	                url_file = self.__class__.quote_file(filename),
-	                range = file_range_fmt % (offset, offset+length-1)
-	            )
-	            print self.format('rdf_member',
-	                url_file = self.__class__.quote_file(filename_origin),
-	                range = file_range_fmt % (offset_origin, offset_origin+length-1)
-	            )
-	            print self.format('rdf_derived_range',
-	                url_file1 = self.__class__.quote_file(filename),
-	                range1 = file_range_fmt % (offset, offset+length-1),
-	                url_file2 = self.__class__.quote_file(filename_origin),
-	                range2 = file_range_fmt % (offset_origin, offset_origin+length-1)
-	            )
-	        elif rtype == 'REP':
-	            print self.format('rdf_member',
-	                url_file = self.__class__.quote_file(filename),
-	                range = file_range_fmt % (offset, offset+length-1)
-	            )
-	            print self.format('rdf_member',
-	                url_file = self.__class__.quote_file(filename_origin),
-	                range = file_range_fmt % (offset_origin, offset_origin)
-	            )
-	            print self.format('rdf_derived_range',
-	                url_file1 = self.__class__.quote_file(filename),
-	                range1 = file_range_fmt % (offset, offset+length-1),
-	                url_file2 = self.__class__.quote_file(filename_origin),
-	                range2 = file_range_fmt % (offset_origin, offset_origin)
-	            )
+		# output ranges
+		# dead block - minrange is currently always 0 for DSL output
+		if self.minrange > 0 and length >= self.minrange:
+			if rtype == 'SEQ':
+				print self.format('member',
+					filename = self.__class__.quote_file(filename),
+					range = file_range_fmt % (offset, offset+length-1)
+				)
+				print self.format('member',
+					filename = self.__class__.quote_file(filename_origin),
+					range = file_range_fmt % (origin_offset, origin_offset+length-1)
+				)
+				print self.format('derived_range',
+					filename1 = self.__class__.quote_file(filename),
+					range1 = file_range_fmt % (offset, offset+length-1),
+					filename2 = self.__class__.quote_file(filename_origin),
+					range2 = file_range_fmt % (origin_offset, origin_offset+length-1)
+				)
+			elif rtype == 'REP':
+				print self.format('member',
+					filename = self.__class__.quote_file(filename),
+					range = file_range_fmt % (offset, offset+length-1)
+				)
+				print self.format('member',
+					filename = self.__class__.quote_file(filename_origin),
+					range = file_range_fmt % (origin_offset, origin_offset)
+				)
+				print self.format('derived_range',
+					filename1 = self.__class__.quote_file(filename),
+					range1 = file_range_fmt % (offset, offset+length-1),
+					filename2 = self.__class__.quote_file(filename_origin),
+					range2 = file_range_fmt % (origin_offset, origin_offset)
+				)
 
-	    # TODO: Aggregation per written buffer is done inside dtracker.
-	    # Additional aggregation may be done here.
+		# TODO: Aggregation per written buffer is done inside dtracker.
+		# Additional aggregation may be done here.
 
 	def handle_x(self, data):
-	    # line format: x:<program name>
-	    self.exe = data
-	    self.generated.clear()
+		pid, self.exe = itemgetter('pid', 'program')(data)
+		self.generated.clear()
 
-	    print self.format('dsl_exec',
-	        url_program = 'file://'+urllib.pathname2url(self.exe),
-	    )
+		print self.format('exec',
+			pid = pid,
+			url_program = self.__class__.quote_file(self.exe),
+		)
 
 
 
 #### main ###########################################################
 if __name__ == "__main__":
-    tag_range = {}
+	tag_range = {}
 
-    parser = argparse.ArgumentParser(description='Convert DataTracker raw format to input for the SPADE DSL Reporter.')
-    # parser.add_argument('-minrange', type=int, default=0, help='the minimum range size to be included in the output')
-    # parser.add_argument('dsl-pipe', metavar='pipe', nargs='*', help='location of the SPADE DSL pipe')
-    parser.add_argument('files', metavar='file', nargs='*', help='specify input files')
-    args = parser.parse_args()
+	parser = argparse.ArgumentParser(description='Convert DataTracker raw format to input for the SPADE DSL Reporter.')
+	# parser.add_argument('-minrange', type=int, default=0, help='the minimum range size to be included in the output')
+	# parser.add_argument('dsl-pipe', metavar='pipe', nargs='*', help='location of the SPADE DSL pipe')
+	parser.add_argument('files', metavar='file', nargs='*', help='specify input files')
+	args = parser.parse_args()
 
-    converter = RawDSLConverter(minrange = getattr(args, 'minrange', 0))
+	converter = RawDSLConverter(minrange=getattr(args, 'minrange', 0))
 
-    for line in fileinput.input(args.files):
+	for line in fileinput.input(args.files):
 		converter.process_line(line)
