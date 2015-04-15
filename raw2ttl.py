@@ -120,7 +120,9 @@ class RawConverter:
 	derived = {}
 	generated = set()
 
-	def __init__(self, minrange=0):
+	def __init__(self, keepcomments=True, keepbad=False, minrange=0):
+		self.keepcomments = keepcomments
+		self.keepbad = keepbad
 		self.minrange = minrange
 		self.output_static('header')
 		self.handlers = dict(filter(
@@ -142,7 +144,8 @@ class RawConverter:
 		line = line.strip()
 
 		if line.startswith('#'):
-			print line
+			if self.keepcomments:
+				print line
 		else:
 			op, data =  line.strip().split(':', 1)
 
@@ -155,8 +158,10 @@ class RawConverter:
 				self.handlers['handle_'+op](data_dict)
 			except KeyError:
 				# Keep bad lines as comments
-				print '# '+line
-				raise
+				if self.keepbad:
+					print '#BAD '+line
+				else:
+					raise
 
 	@classmethod
 	def quote_file(cls, filename, asURL=False):
