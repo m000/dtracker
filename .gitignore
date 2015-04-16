@@ -1,3 +1,11 @@
+*.sw*
+*.pyc
+*.out
+*.log
 obj-ia32
 pin
 support/pin-*
+support/neoclipse-*
+support/provToolbox
+support/toolbox-*
+neoclipse
