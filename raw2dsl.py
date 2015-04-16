@@ -16,6 +16,12 @@ from time import gmtime, strftime
 # type:<Agent|Process|Artifact> id:<unique identifier> <key>:<value> ... <key>:<value>
 # type:<Used|WasGeneratedBy|WasTriggeredBy|WasDerivedFrom|WasControlledBy> from:<unique identifier> to:<unique identifier> <key>:<value> ... <key>:<value> 
 
+##########################################################################################
+# XXX: after a fork() provenance of two processes may be interleaved in the raw output.
+#      for this, pid probably has to be printed with every line in the raw output.
+#	   also, locking may be required when dumping to the raw output. 
+##########################################################################################
+
 #### Exceptions #####################################################
 class NoVertexIDError(Error):
 	"""Raised when there's no vid for an artifact."""
@@ -30,10 +36,10 @@ class NoVertexIDError(Error):
 class RawDSLConverter(RawConverter):
 	formats = {
 		'exec': dedent('''
-			type:Process id:{vid} program:{url_program} pid:{pid}
+			type:Process id:{proc_vid} program:{program} pid:{pid}
 		''').strip(),
 		'open': dedent('''
-			type:Artifact id:{vid} file:{filename} label:"{label}"
+			type:Artifact id:{file_vid} file:{filename} label:"{label}"
 		''').strip(),
 		'used': dedent('''
 			type:Used from:{proc_vid} to:{file_vid}
@@ -42,7 +48,7 @@ class RawDSLConverter(RawConverter):
 			type:WasDerivedFrom from:{file_vid1} to:{file_vid2}
 		''').strip(),
 		'generated': dedent('''
-			type:wasGeneratedBy from:{proc_vid} to:{file_vid}
+			type:WasGeneratedBy from:{file_vid} to:{proc_vid}
 		''').strip(),
 
 		# not used for now
@@ -77,9 +83,13 @@ class RawDSLConverter(RawConverter):
 				self.vid_next+=1
 		return self.vid_files[filename]
 
-	def get_proc_vid(self, program, pid, makenew=True):
+	def get_proc_vid(self, program=None, pid=None, makenew=True):
 		""" Returns the vertex id for the specified process.
 		"""
+		makenew = False if (program is None or pid is None) else makenew
+		program = self.exe if (program is None) else program
+		pid = self.pid if (pid is None) else pid
+
 		k = '%s[%s]' % (program, pid)
 		if k not in self.vid_procs:
 			if not makenew:
@@ -111,7 +121,7 @@ class RawDSLConverter(RawConverter):
 
 		if mode == 't' or mode == 'g':
 			print self.format('generated',
-				proc_vid = self.get_proc_vid(self.exe, False),
+				proc_vid = self.get_proc_vid(),
 				file_vid = self.get_file_vid(filename, False),
 			)
 		else:
@@ -123,7 +133,7 @@ class RawDSLConverter(RawConverter):
 		self.ufdmap[ufd] = filename
 
 		print self.format('open',
-			vid = self.get_file_vid(filename),
+			file_vid = self.get_file_vid(filename),
 			filename = self.__class__.quote_file(filename),
 			label = filename
 		)
@@ -131,9 +141,8 @@ class RawDSLConverter(RawConverter):
 	def handle_u(self, data):
 		exe, filename = itemgetter('program', 'file')(data)
 		assert self.exe == exe, "Unexpected change to executable name. Expected %s. Got %s." % (self.exe, exe)
-
 		print self.format('used',
-			proc_vid = self.get_proc_vid(self.exe, False),
+			proc_vid = self.get_proc_vid(),
 			file_vid = self.get_file_vid(filename, False),
 		)
 
@@ -156,7 +165,7 @@ class RawDSLConverter(RawConverter):
 		# emit generated triple if needed
 		if filename in self.generated:
 			print self.format('generated',
-				proc_vid = self.get_proc_vid(self.exe, False),
+				proc_vid = self.get_proc_vid(),
 				file_vid = self.get_file_vid(filename, False),
 			)
 			self.generated.remove(filename)
@@ -213,13 +222,13 @@ class RawDSLConverter(RawConverter):
 		##################################################################
 
 	def handle_x(self, data):
-		pid, self.exe = itemgetter('pid', 'program')(data)
+		self.pid, self.exe = itemgetter('pid', 'program')(data)
 		self.generated.clear()
 
 		print self.format('exec',
-			vid = self.get_proc_vid(self.exe, pid),
-			pid = pid,
-			url_program = self.__class__.quote_file(self.exe),
+			proc_vid = self.get_proc_vid(self.exe, self.pid),
+			pid = self.pid,
+			program = self.__class__.quote_file(self.exe),
 		)
 
 

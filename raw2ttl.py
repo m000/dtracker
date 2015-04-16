@@ -116,6 +116,7 @@ class RawConverter:
 		'x': (['pid', 'program'], 1),
 	}
 	exe = None
+	pid = -1
 	ufdmap = {}
 	derived = {}
 	generated = set()
