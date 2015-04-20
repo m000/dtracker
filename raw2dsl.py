@@ -35,12 +35,16 @@ class NoVertexIDError(Error):
 #### SPADE DSL converter class ###################################
 class RawDSLConverter(RawConverter):
 	formats = {
-		'exec': dedent('''
+		'program_vertex': dedent('''
 			type:Process id:{proc_vid} program:{program} pid:{pid}
 		''').strip(),
-		'open': dedent('''
-			type:Artifact id:{file_vid} file:{filename} label:"{label}"
+		'file_vertex': dedent('''
+			type:Artifact id:{file_vid} filename:{filename} label:"{label}"
 		''').strip(),
+		'range_vertex': dedent('''
+			type:Artifact id:{range_vid} file:{rangename} memberof:{file_vid}
+		''').strip(),
+
 		'used': dedent('''
 			type:Used from:{proc_vid} to:{file_vid}
 		''').strip(),
@@ -51,14 +55,13 @@ class RawDSLConverter(RawConverter):
 			type:WasGeneratedBy from:{file_vid} to:{proc_vid}
 		''').strip(),
 
+		'range': '{filename}[{start},{end}]',
+
 		# not used for now
 		'derived_range': dedent('''
 			<{filename1}{range1}> prov:wasDerivedFrom <{filename2}{range2}> .
 		''').strip(),
-		'member': dedent('''
-			<{filename}> prov:hadMember <{filename}{range}> .
-		''').strip(),
-		'file_range': '#%d-%d',
+
 	}
 
 	def __init__(self, keepcomments=True, keepbad=False, minrange=0):
@@ -132,7 +135,7 @@ class RawDSLConverter(RawConverter):
 		ufd, filename = itemgetter('ufd', 'file')(data)
 		self.ufdmap[ufd] = filename
 
-		print self.format('open',
+		print self.format('file_vertex',
 			file_vid = self.get_file_vid(filename),
 			filename = self.__class__.quote_file(filename),
 			label = filename
@@ -176,61 +179,56 @@ class RawDSLConverter(RawConverter):
 		else:
 			self.derived[ufd] = set([filename_origin])
 
-		##################################################################
-		##################################################################
-		##################################################################
-		# dead block - minrange is currently always 0 for DSL output
-		##################################################################
-		##################################################################
 		# output ranges
-		# if self.minrange > 0 and length >= self.minrange:
-		# 	if rtype == 'SEQ':
-		# 		print self.format('member',
-		# 			filename = self.__class__.quote_file(filename),
-		# 			range = file_range_fmt % (offset, offset+length-1)
-		# 		)
-		# 		print self.format('member',
-		# 			filename = self.__class__.quote_file(filename_origin),
-		# 			range = file_range_fmt % (origin_offset, origin_offset+length-1)
-		# 		)
-		# 		print self.format('derived_range',
-		# 			filename1 = self.__class__.quote_file(filename),
-		# 			range1 = file_range_fmt % (offset, offset+length-1),
-		# 			filename2 = self.__class__.quote_file(filename_origin),
-		# 			range2 = file_range_fmt % (origin_offset, origin_offset+length-1)
-		# 		)
-		# 	elif rtype == 'REP':
-		# 		print self.format('member',
-		# 			filename = self.__class__.quote_file(filename),
-		# 			range = file_range_fmt % (offset, offset+length-1)
-		# 		)
-		# 		print self.format('member',
-		# 			filename = self.__class__.quote_file(filename_origin),
-		# 			range = file_range_fmt % (origin_offset, origin_offset)
-		# 		)
-		# 		print self.format('derived_range',
-		# 			filename1 = self.__class__.quote_file(filename),
-		# 			range1 = file_range_fmt % (offset, offset+length-1),
-		# 			filename2 = self.__class__.quote_file(filename_origin),
-		# 			range2 = file_range_fmt % (origin_offset, origin_offset)
-		# 		)
-		##################################################################
-		# TODO: Aggregation per written buffer is done inside dtracker.
-		# Additional aggregation may be done here.
-		##################################################################
-		##################################################################
-		##################################################################
+		if self.minrange > 0 and length >= self.minrange:
+			if rtype == 'SEQ':
+				range_origin = self.format('range',
+					filename = self.__class__.quote_file(filename_origin),
+					start = origin_offset,
+					end = origin_offset+length-1
+				)
+				range_dest = self.format('range',
+					filename = self.__class__.quote_file(filename),
+					start = offset,
+					end = offset+length-1
+				)
+			elif rtype == 'REP':
+				range_origin = self.format('range',
+					filename = self.__class__.quote_file(filename_origin),
+					start = origin_offset,
+					end = origin_offset
+				)
+				range_dest = self.format('range',
+					filename = self.__class__.quote_file(filename),
+					start = offset,
+					end = offset+length-1
+				)
+
+			print self.format('range_vertex',
+				range_vid = self.get_file_vid(range_origin),
+				rangename = range_origin,
+				file_vid = self.get_file_vid(filename_origin, False)
+			)
+			print self.format('range_vertex',
+				range_vid = self.get_file_vid(range_dest),
+				rangename = range_dest,
+				file_vid = self.get_file_vid(filename, False)
+			)
+			print self.format('derived',
+				file_vid1 = self.get_file_vid(range_origin, False),
+				file_vid2 = self.get_file_vid(range_dest, False),
+			)
+
 
 	def handle_x(self, data):
 		self.pid, self.exe = itemgetter('pid', 'program')(data)
 		self.generated.clear()
 
-		print self.format('exec',
+		print self.format('program_vertex',
 			proc_vid = self.get_proc_vid(self.exe, self.pid),
 			pid = self.pid,
 			program = self.__class__.quote_file(self.exe),
 		)
-
 
 
 #### main ###########################################################
@@ -238,7 +236,7 @@ if __name__ == "__main__":
 	tag_range = {}
 
 	parser = argparse.ArgumentParser(description='Convert DataTracker raw format to input for the SPADE DSL Reporter.')
-	# parser.add_argument('-minrange', type=int, default=0, help='the minimum range size to be included in the output')
+	parser.add_argument('-minrange', type=int, default=0, help='the minimum range size to be included in the output')
 	# parser.add_argument('dsl-pipe', metavar='pipe', nargs='*', help='location of the SPADE DSL pipe')
 	parser.add_argument('files', metavar='file', nargs='*', help='specify input files')
 	args = parser.parse_args()
