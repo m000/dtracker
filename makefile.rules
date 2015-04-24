@@ -7,11 +7,14 @@ SUPPORT_REL_PATH = ./support
 SUPPORT_PATH = $(realpath $(SUPPORT_REL_PATH))
 LIBDFT_PATH = $(realpath $(SUPPORT_PATH)/libdft/src)
 
+# Turns pintool.log output off.
+LOGGING_FLAGS = -DNO_PINTOOL_LOG
+
 # Pin Makefile variables.
 TOOL_ROOTS := dtracker #heatmap-toy bbl-toy trace
 APP_ROOTS := 
 TEST_ROOTS := 
-TOOL_CXXFLAGS += -DCUSTOM_TAGS_FDOFFSET -std=c++11 -I$(LIBDFT_PATH) -I./include
+TOOL_CXXFLAGS += $(LOGGING_FLAGS) -DCUSTOM_TAGS_FDOFFSET -std=c++11 -I$(LIBDFT_PATH) -I./include
 
 #######################################################################
 # Data Tracker.

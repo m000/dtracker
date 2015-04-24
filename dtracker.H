@@ -12,7 +12,6 @@
 #include <sys/stat.h>
 
 /**** generic macros and definitions ******************************/
-
 #define BOOL(x) ((x) ? 1 : 0)
 
 /* compiler directives for branch prediction */
@@ -38,9 +37,7 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
-
 /**** data types and externals ************************************/
-
 /* Array that maps fds to ufds. */
 typedef UINT32 ufd_t;
 typedef struct {
@@ -63,9 +60,15 @@ extern std::ofstream rawProvStream;
 /* Current executable name. */
 extern std::string exename;
 
+/**** debugging macros and inlines ********************************/
+#ifdef NO_PINTOOL_LOG
+#ifdef LOG
+#undef LOG
+#endif
+#define LOG(args...) do{} while(0)
+#endif
 
 /**** output macros and inlines ***********************************/
-
 typedef struct {
 	enum {NONE, SEQ, REP} type;
 	ssize_t start;

@@ -21,8 +21,14 @@
  * which merges the arguments in a format suitable to be used with 
  * Pin's LOG() function. As a convention, non-imporant arguments can
  * be rendered as "*".
+ * Using _CALL_LOG_STR anywhere in the code adds a lot of string 
+ * concatenations. To avoid that during measurements, we define it
+ * to the empty string if NO_PINTOOL_LOG is set.
  */
 
+#ifdef NO_PINTOOL_LOG
+#define _CALL_LOG_STR ""
+#endif
 
 /**** open(2) *****************************************************/
 #ifdef DEF_SYSCALL_OPEN
@@ -30,7 +36,9 @@
 #define _PATHNAME		(char *)ctx->arg[SYSCALL_ARG0]
 #define _FLAGS			(ctx->nr == __NR_open ? ctx->arg[SYSCALL_ARG1] : O_CREAT|O_WRONLY|O_TRUNC)
 #define _MODE			(ctx->nr == __NR_creat ? ctx->arg[SYSCALL_ARG1] : ctx->arg[SYSCALL_ARG2])
+#ifndef NO_PINTOOL_LOG
 #define _CALL_LOG_STR	+ std::string(ctx->nr == __NR_creat ? "creat(" : "open(") + _PATHNAME + ", " + decstr(_FLAGS) + ", " + decstr(_MODE) + ") = " + decstr(_FD)
+#endif
 #undef DEF_SYSCALL_OPEN
 #endif
 
@@ -39,7 +47,9 @@
 #undef _PATHNAME
 #undef _FLAGS
 #undef _MODE
+#ifndef NO_PINTOOL_LOG
 #undef _CALL_LOG_STR
+#endif
 #undef UNDEF_SYSCALL_OPEN
 #endif
 
@@ -47,14 +57,18 @@
 #ifdef DEF_SYSCALL_CLOSE
 #define _RET_STATUS		(int)ctx->ret
 #define _FD				(int)ctx->arg[SYSCALL_ARG0]
+#ifndef NO_PINTOOL_LOG
 #define _CALL_LOG_STR	"close(" + decstr(_FD) + ") = " + decstr(_RET_STATUS)
+#endif
 #undef DEF_SYSCALL_CLOSE
 #endif
 
 #ifdef UNDEF_SYSCALL_CLOSE
 #undef _RET_STATUS
 #undef _FD
+#ifndef NO_PINTOOL_LOG
 #undef _CALL_LOG_STR
+#endif
 #undef UNDEF_SYSCALL_CLOSE
 #endif
 
@@ -67,7 +81,9 @@
 #define _FLAGS			(int)ctx->arg[SYSCALL_ARG3]
 #define _FD				(int)ctx->arg[SYSCALL_ARG4]
 #define _FD_OFFSET		((INT64)ctx->arg[SYSCALL_ARG5]*4096)
+#ifndef NO_PINTOOL_LOG
 #define _CALL_LOG_STR	"mmap2(*, " + decstr(_LENGTH) + ", " + "*, *, " + decstr(_FD) + ", " + std::string(((_FLAGS&(MAP_ANONYMOUS|MAP_ANON)) != 0) ? "*" : hexstr(_FD_OFFSET)) + ") = " + StringFromAddrint(_ADDR)
+#endif
 #undef DEF_SYSCALL_MMAP2
 #endif
 
@@ -79,7 +95,9 @@
 #undef _FLAGS
 #undef _FD
 #undef _FD_OFFSET
+#ifndef NO_PINTOOL_LOG
 #undef _CALL_LOG_STR
+#endif
 #undef UNDEF_SYSCALL_MMAP2
 #endif
 
@@ -89,7 +107,9 @@
 #define _RET_STATUS		ctx->ret
 #define _ADDR			(ADDRINT)ctx->arg[SYSCALL_ARG0]
 #define _LENGTH			(size_t)ctx->arg[SYSCALL_ARG1]
+#ifndef NO_PINTOOL_LOG
 #define _CALL_LOG_STR	"munmap(" + StringFromAddrint(_ADDR) + ", " + decstr(_LENGTH) + ") = " + decstr(_RET_STATUS)
+#endif
 #undef DEF_SYSCALL_MUNMAP
 #endif
 
@@ -97,7 +117,9 @@
 #undef _RET_STATUS
 #undef _ADDR
 #undef _LENGTH
+#ifndef NO_PINTOOL_LOG
 #undef _CALL_LOG_STR
+#endif
 #undef UNDEF_SYSCALL_MUNMAP
 #endif
 
@@ -106,14 +128,18 @@
 #ifdef DEF_SYSCALL_READ
 #define _RET_STATUS		(int)ctx->ret
 #define _FD				(int)ctx->arg[SYSCALL_ARG0]
+#ifndef NO_PINTOOL_LOG
 #define _CALL_LOG_STR	"close(" + decstr(_FD) + ") = " + decstr(_RET_STATUS)
+#endif
 #undef DEF_SYSCALL_READ
 #endif
 
 #ifdef UNDEF_SYSCALL_READ
 #undef _RET_STATUS
 #undef _FD
+#ifndef NO_PINTOOL_LOG
 #undef _CALL_LOG_STR
+#endif
 #undef UNDEF_SYSCALL_READ
 #endif
 
@@ -124,7 +150,9 @@
 #define _FD				(int)ctx->arg[SYSCALL_ARG0]
 #define _BUF			(ADDRINT)ctx->arg[SYSCALL_ARG1]
 #define _COUNT			(size_t)ctx->arg[SYSCALL_ARG2]
+#ifndef NO_PINTOOL_LOG
 #define _CALL_LOG_STR	"write(" + decstr(_FD) + ", " + StringFromAddrint(_BUF) + ", " + decstr(_COUNT) + ") = " + decstr(_N_WRITTEN)
+#endif
 #undef DEF_SYSCALL_WRITE
 #endif
 
@@ -133,6 +161,8 @@
 #undef _FD
 #undef _BUF
 #undef _COUNT
+#ifndef NO_PINTOOL_LOG
 #undef _CALL_LOG_STR
+#endif
 #undef UNDEF_SYSCALL_WRITE
 #endif
