@@ -203,6 +203,10 @@ class RawDSLConverter(RawConverter):
 					start = offset,
 					end = offset+length-1
 				)
+			else:
+				# temp fix for NONE ranges
+				# the script will run, but they will be missed	
+				return
 
 			print self.format('range_vertex',
 				range_vid = self.get_file_vid(range_origin),
