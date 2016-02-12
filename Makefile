@@ -12,7 +12,7 @@ PIN_ROOT := ./pin
 CONFIG_ROOT := $(PIN_ROOT)/source/tools/Config
 endif
 include $(CONFIG_ROOT)/makefile.config
-include makefile.rules
+include Makefile.rules
 ifeq ($(wildcard $(TOOLS_ROOT)/Config/makefile.default.rules),)
 $(warning Cannot include makefile.default.rules. This is caused because Pin assumes our code is located under PIN_ROOT. Fix this by running:)
 $(warning sed -i.bak 's/PIN_ROOT :=/PIN_ROOT ?=/' "$(CONFIG_ROOT)/makefile.unix.config")
