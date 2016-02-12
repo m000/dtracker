@@ -97,6 +97,28 @@ In this repository also include a few sample programs we used for evaluating the
 make -C samples
 ```
 
+<!--
+Integration with SPADE
+-----------------------
+
+```
+<provenance> ::= <provenance> <element> | <element>
+<element> ::= <node> | <dependency>
+<node> ::= <node-type> <node-id> <annotation-list>
+<node-type> ::= type: <vertex-type>
+<vertex-type> ::= Agent | Process | Artifact
+<node-id> ::= id: <vertex-id>
+<vertex-id> ::= <unique-identifier>
+<annotation-list> ::= <annotation-list> <annotation> | <annotation>
+<annotation> ::= <key> : <value>
+<dependency> ::= <dependency-type> <start-node> <end-node>
+<annotation-list>
+<dependency-type> ::= type: <edge-type>
+<edge-type> ::= WasControlledBy | WasGeneratedBy | Used | WasTriggeredBy | WasDerivedFrom
+<start-node> ::= from: <vertex-id>
+<end-node> ::= to: <vertex-id>
+```
+-->
 
 [pin]: http://software.intel.com/en-us/articles/pin-a-dynamic-binary-instrumentation-tool
 [pin-dl]: http://software.intel.com/en-us/articles/pintool-downloads
