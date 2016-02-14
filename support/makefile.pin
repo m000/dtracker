@@ -3,9 +3,19 @@ include makefile.vars
 PIN_TARBALL=$(notdir $(PIN_TARBALL_URL))
 PIN_BASEDIR=$(basename $(basename $(PIN_TARBALL)))
 
+ifdef PIN_ROOT
+$(info ## $$PIN_ROOT is set to $(PIN_ROOT). Skipping Pin installation.)
+ALL_TARGETS=
+else
+ALL_TARGETS=../pin
+endif
+
 .PHONY: all
-all: $(PIN_BASEDIR)
-	@[ -e ../pin ] || $(LN) -sf support/$(PIN_BASEDIR) ../pin
+
+all: $(ALL_TARGETS)
+
+../pin: $(PIN_BASEDIR)
+	$(LN) -sf support/$(PIN_BASEDIR) ../pin
 
 $(PIN_BASEDIR): $(PIN_TARBALL)
 	@[ -d $@ ] || $(TAR) -zxvf $(PIN_TARBALL)

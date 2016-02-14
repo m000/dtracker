@@ -34,10 +34,10 @@ On Debian/Ubuntu systems, you should install ``build-essential`` meta-package wh
 make -C support -f makefile.pin
 ```
 
-**libdft:** The modified libdft is packed as a submodule of DataTracker. You need to disable Git's certificate checking to successfully retrieve it. Because libdft does not use [Pin's makefile infrastructure][pin-makefile] you need to set ``PIN_HOME`` environment variable before compiling it. 
+**libdft:** The modified libdft is packed as a submodule of DataTracker. You need to disable Git's certificate checking to successfully retrieve it. Because libdft does not use [Pin's makefile infrastructure][pin-makefile] you need to set ``PIN_ROOT`` environment variable before compiling it. E.g.:
 
 ```
-export PIN_HOME=$(pwd)/pin
+export PIN_ROOT=$(pwd)/pin
 GIT_SSL_NO_VERIFY=true git submodule update --init
 make support-libdft
 ```
