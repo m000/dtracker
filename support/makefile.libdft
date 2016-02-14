@@ -1,19 +1,16 @@
 include makefile.vars
 
-LIBDFT_ARCH = $(firstword $(shell ls -t libdft-*.tar.gz))
-LIBDFT_SRC = libdft/src
+LIBDFT_SRC			= libdft/src
+LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_set_fdoff					# fdset offset tags
+#LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_bitset -DTAG_BITSET_SIZE=32	# bitset tags
+CPPFLAGS			+= $(LIBDFT_TAG_FLAGS)
 
 .PHONY: all
 all: libdft
 
 .PHONY: libdft
 libdft: $(LIBDFT_SRC)
-	cd $< && CXXFLAGS=-DCUSTOM_TAGS_FDOFFSET make
-
-#$(LIBDFT_SRC):
-#mkdir -p libdft
-#cd libdft && tar -zxvf ../$(LIBDFT_ARCH)
-#$(RM) -rf libdft
+	cd $< && CPPFLAGS=$(CPPFLAGS) make
 
 .PHONY: clean
 clean: $(LIBDFT_SRC)
