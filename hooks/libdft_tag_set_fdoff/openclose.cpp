@@ -1,4 +1,4 @@
-#include "hooks.H"
+#include "hooks/hooks.H"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -8,8 +8,8 @@
 #include "tagmap.h"
 #include "pin.H"
 
-#include "../dtracker.H"
-#include "../osutils.H"
+#include "dtracker.H"
+#include "osutils.H"
 
 /* tracks whether path existed before the execution of syscall */
 static struct {
@@ -26,15 +26,17 @@ static struct {
  * int creat(const char *pathname, mode_t mode);
  */
 #define DEF_SYSCALL_OPEN
-#include "syscall_args.h"
-void pre_open_hook(syscall_ctx_t *ctx) {
+#include "hooks/syscall_args.h"
+template<>
+void pre_open_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	/* Check the status of the pathname we are about to open/create. */
 	exist_status.pathname = std::string(_PATHNAME);
 	exist_status.existed_before_syscall = path_exists(exist_status.pathname);
 	//std::cerr << exist_status.pathname << std::endl;
 	//std::cerr << exist_status.existed_before_syscall << std::endl;
 }
-void post_open_hook(syscall_ctx_t *ctx) {
+template<>
+void post_open_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	/* not successful; optimized branch */
 	if (unlikely(_FD < 0)) {
 		LOG("ERROR " _CALL_LOG_STR + " (" + strerror(errno) + ")\n");
@@ -66,7 +68,7 @@ void post_open_hook(syscall_ctx_t *ctx) {
 	exist_status.existed_before_syscall = 0;
 }
 #define UNDEF_SYSCALL_OPEN
-#include "syscall_args.h"
+#include "hooks/syscall_args.h"
 
 /*
  * close(2) handler - updates watched fds
@@ -74,8 +76,9 @@ void post_open_hook(syscall_ctx_t *ctx) {
  * Signature: int close(int fd);
  */
 #define DEF_SYSCALL_CLOSE
-#include "syscall_args.h"
-void post_close_hook(syscall_ctx_t *ctx) {
+#include "hooks/syscall_args.h"
+template<>
+void post_close_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	/* not successful; optimized branch */
 	if (unlikely(_RET_STATUS < 0)) {
 		LOG("ERROR " _CALL_LOG_STR + " (" + strerror(errno) + ")\n");
@@ -97,4 +100,4 @@ void post_close_hook(syscall_ctx_t *ctx) {
 	PROVLOG_CLOSE(ufd);
 }
 #define UNDEF_SYSCALL_CLOSE
-#include "syscall_args.h"
+#include "hooks/syscall_args.h"

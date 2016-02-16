@@ -1,4 +1,4 @@
-#include "hooks.H"
+#include "hooks/hooks.H"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -9,8 +9,8 @@
 #include "tagmap.h"
 #include "pin.H"
 
-#include "../dtracker.H"
-#include "../osutils.H"
+#include "dtracker.H"
+#include "osutils.H"
 
 
 // TODO: Consider hooking mprotect(2).
@@ -24,8 +24,9 @@
  * TODO: Don't forget to also create hooks for munmap(), mremap().
  */
 #define DEF_SYSCALL_MMAP2
-#include "syscall_args.h"
-void post_mmap2_hook(syscall_ctx_t *ctx) {
+#include "hooks/syscall_args.h"
+template<>
+void post_mmap2_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	/* not successful; optimized branch */
 	if (unlikely(_ADDR == (ADDRINT)-1)) {
 		LOG("ERROR " _CALL_LOG_STR + " (" + strerror(errno) + ")\n");
@@ -62,7 +63,7 @@ void post_mmap2_hook(syscall_ctx_t *ctx) {
 	}
 }
 #define UNDEF_SYSCALL_MMAP2
-#include "syscall_args.h"
+#include "hooks/syscall_args.h"
 
 /*
  * munmap(2) handler
@@ -71,8 +72,9 @@ void post_mmap2_hook(syscall_ctx_t *ctx) {
  *
  */
 #define DEF_SYSCALL_MUNMAP
-#include "syscall_args.h"
-void post_munmap_hook(syscall_ctx_t *ctx) {
+#include "hooks/syscall_args.h"
+template<>
+void post_munmap_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	/* not successful; optimized branch */
 	if (unlikely(_RET_STATUS < 0)) {
 		LOG("ERROR " _CALL_LOG_STR + " (" + strerror(errno) + ")\n");
@@ -83,4 +85,4 @@ void post_munmap_hook(syscall_ctx_t *ctx) {
 	for(size_t i=0; i<_LENGTH; i++) tagmap_clrb(_ADDR+i);
 }
 #define UNDEF_SYSCALL_MUNMAP
-#include "syscall_args.h"
+#include "hooks/syscall_args.h"
