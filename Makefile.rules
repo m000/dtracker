@@ -9,8 +9,8 @@ DTRACKER_ROOT		= $(abspath $(dir $(firstword $(MAKEFILE_LIST))))
 SUPPORT_REL_PATH	= ./support
 SUPPORT_PATH		= $(realpath $(SUPPORT_REL_PATH))
 LIBDFT_PATH			= $(realpath $(SUPPORT_PATH)/libdft/src)
-LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_set_fdoff
-#LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_bitset -DTAG_BITSET_SIZE=32
+#LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_set_fdoff
+LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_bitset -DTAG_BITSET_SIZE=32
 
 # Turns pintool.log output off.
 LOGGING_FLAGS = -DNO_PINTOOL_LOG
