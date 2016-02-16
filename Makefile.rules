@@ -2,47 +2,49 @@
 # For docs see: http://software.intel.com/sites/landingpage/pintool/docs/62141/Pin/html/index.html#AddingTests
 # For a complex example see: pin/source/tools/SimpleExamples/makefile.rules
 
+# DataTracker top dir
+DTRACKER_ROOT		= $(abspath $(dir $(firstword $(MAKEFILE_LIST))))
+
 # Paths for support libraries.
-SUPPORT_REL_PATH = ./support
-SUPPORT_PATH = $(realpath $(SUPPORT_REL_PATH))
-LIBDFT_PATH = $(realpath $(SUPPORT_PATH)/libdft/src)
+SUPPORT_REL_PATH	= ./support
+SUPPORT_PATH		= $(realpath $(SUPPORT_REL_PATH))
+LIBDFT_PATH			= $(realpath $(SUPPORT_PATH)/libdft/src)
+LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_set_fdoff
+#LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_bitset -DTAG_BITSET_SIZE=32
 
 # Turns pintool.log output off.
 LOGGING_FLAGS = -DNO_PINTOOL_LOG
 
 # Pin Makefile variables.
-TOOL_ROOTS := dtracker #heatmap-toy bbl-toy trace
+TOOL_ROOTS := dtracker
 APP_ROOTS := 
 TEST_ROOTS := 
-TOOL_CXXFLAGS += $(LOGGING_FLAGS) -DCUSTOM_TAGS_FDOFFSET -std=c++11 -I$(LIBDFT_PATH) -I./include
+TOOL_CXXFLAGS += -std=c++11 $(LOGGING_FLAGS) $(LIBDFT_TAG_FLAGS) -I$(DTRACKER_ROOT) -I$(LIBDFT_PATH)
 
 #######################################################################
 # Data Tracker.
 #######################################################################
-DTRACKER_HOOKS := $(OBJDIR)hooks/dtracker_openclose$(OBJ_SUFFIX)
-DTRACKER_HOOKS += $(OBJDIR)hooks/dtracker_read$(OBJ_SUFFIX) $(OBJDIR)hooks/dtracker_write$(OBJ_SUFFIX)
-DTRACKER_HOOKS += $(OBJDIR)hooks/dtracker_mmap$(OBJ_SUFFIX)
-DTRACKER_DEBUG := $(OBJDIR)dtracker_debug$(OBJ_SUFFIX)
+DTRACKER_HOOKS_ACTIVE	= $(shell echo "LIBDFT_TAG_TYPE" | $(CPP) $(LIBDFT_TAG_FLAGS) - | tail -1)
+DTRACKER_HOOKS_DIR		= hooks/$(DTRACKER_HOOKS_ACTIVE)
+DTRACKER_HOOKS_SRC		= $(wildcard $(DTRACKER_HOOKS_DIR)/*.cpp)
+DTRACKER_HOOKS_OBJS		= $(patsubst %.cpp,$(OBJDIR)%$(OBJ_SUFFIX),$(DTRACKER_HOOKS_SRC))
 
-$(OBJDIR)dtracker$(OBJ_SUFFIX): dtracker.cpp | $(OBJDIR)hooks
+DTRACKER_OBJS			= $(OBJDIR)dtracker$(OBJ_SUFFIX)\
+						  $(DTRACKER_HOOKS_OBJS)\
+						  $(OBJDIR)osutils$(OBJ_SUFFIX)\
+						  $(OBJDIR)dtracker_debug$(OBJ_SUFFIX)
+
+$(OBJDIR)dtracker$(OBJ_SUFFIX): dtracker.cpp | $(OBJDIR)hooks/$(DTRACKER_HOOKS_ACTIVE)
 	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
 
-$(OBJDIR)dtracker$(PINTOOL_SUFFIX): $(OBJDIR)dtracker$(OBJ_SUFFIX) $(OBJDIR)osutils$(OBJ_SUFFIX) $(DTRACKER_HOOKS) $(DTRACKER_DEBUG)
+# Note: $(TOOL_LIBS) must come after -ldft, or you'll get undefined symbols at runtime.
+$(OBJDIR)dtracker$(PINTOOL_SUFFIX): $(DTRACKER_OBJS)
 	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$@ $(^:%.h=) $(TOOL_LPATHS) -L$(LIBDFT_PATH) -ldft $(TOOL_LIBS)
-
-#######################################################################
-# jsoncpp
-#######################################################################
-$(OBJDIR)jsoncpp$(OBJ_SUFFIX): jsoncpp.cpp include/json/json.h
-	$(CXX) -I./include $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
-
-jsoncpp.cpp: support-jsoncpp
-include/json/json.h: support-jsoncpp
 
 #######################################################################
 # Directories.
 #######################################################################
-$(OBJDIR)hooks:
+$(OBJDIR)%:
 	mkdir -p $@
 
 #######################################################################
@@ -53,7 +55,7 @@ SUPPORT_VARS += CXX="$(CXX)" CXXFLAGS="$(TOOL_CXXFLAGS)"
 
 .PHONY: support-%
 support-%:
-	$(MAKE) -C support -f makefile.$*
+	LIBDFT_TAG_FLAGS=$(LIBDFT_TAG_FLAGS) $(MAKE) -C support -f makefile.$*
 
 .PHONY: help
 help:
@@ -65,4 +67,4 @@ help:
 	$(info - DEBUG=1 : Turns off optimizations and enables debug flags.)
 	$(info - USE_GLIB=1 : Enable compile/linking flags for glib.)
 
-# vim: ai:ts=4:sw=4:et!:ft=make
+# vim: set noet ts=4 sts=4 sw=4 ai ft=make :

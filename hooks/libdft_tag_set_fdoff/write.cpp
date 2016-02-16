@@ -1,4 +1,4 @@
-#include "hooks.H"
+#include "hooks/hooks.H"
 
 #include <map>
 #include <set>
@@ -11,8 +11,8 @@
 #include "tagmap.h"
 #include "pin.H"
 
-#include "../dtracker.H"
-#include "../osutils.H"
+#include "dtracker.H"
+#include "osutils.H"
 
 
 #include "pin.H"
@@ -80,8 +80,9 @@ static inline std::string __RANGE2STR(const range_map_t & rmap) {
  * Signature: ssize_t write(int fd, const void *buf, size_t count);
  */
 #define DEF_SYSCALL_WRITE
-#include "syscall_args.h"
-void post_write_hook(syscall_ctx_t *ctx) {
+#include "hooks/syscall_args.h"
+template<>
+void post_write_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	/* ignore write() on not watched fd */
 	if (unlikely(fdset.find(_FD) == fdset.end()))
 		return;
@@ -215,9 +216,10 @@ void post_write_hook(syscall_ctx_t *ctx) {
 		PROVLOG_WRITE_RANGE(ufd, write_begin, tm.first, tm.second);
 }
 #define UNDEF_SYSCALL_WRITE
-#include "syscall_args.h"
+#include "hooks/syscall_args.h"
 
-void post_writev_hook(syscall_ctx_t *ctx) {
+template<>
+void post_writev_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	LOG("Writev. Not supported yet.\n");
 }
 

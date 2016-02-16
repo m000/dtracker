@@ -164,23 +164,23 @@ int main(int argc, char **argv) {
 	 */
 
 	/* dtracker_openclose.cpp: open(2), creat(2), close(2) */
-	(void)syscall_set_pre(&syscall_desc[__NR_open], pre_open_hook);
-	(void)syscall_set_pre(&syscall_desc[__NR_creat], pre_open_hook);
-	(void)syscall_set_post(&syscall_desc[__NR_open], post_open_hook);
-	(void)syscall_set_post(&syscall_desc[__NR_creat], post_open_hook);
-	(void)syscall_set_post(&syscall_desc[__NR_close], post_close_hook);
+	(void)syscall_set_pre(&syscall_desc[__NR_open], pre_open_hook<tag_t>);
+	(void)syscall_set_pre(&syscall_desc[__NR_creat], pre_open_hook<tag_t>);
+	(void)syscall_set_post(&syscall_desc[__NR_open], post_open_hook<tag_t>);
+	(void)syscall_set_post(&syscall_desc[__NR_creat], post_open_hook<tag_t>);
+	(void)syscall_set_post(&syscall_desc[__NR_close], post_close_hook<tag_t>);
 
 	/* dtracker_read.cpp: read(2), readv(2) */
-	(void)syscall_set_post(&syscall_desc[__NR_read], post_read_hook);
-	(void)syscall_set_post(&syscall_desc[__NR_readv], post_readv_hook);
+	(void)syscall_set_post(&syscall_desc[__NR_read], post_read_hook<tag_t>);
+	(void)syscall_set_post(&syscall_desc[__NR_readv], post_readv_hook<tag_t>);
 
 	/* dtracker_write.cpp: write(2), writev(2) */
-	(void)syscall_set_post(&syscall_desc[__NR_write], post_write_hook);
-	(void)syscall_set_post(&syscall_desc[__NR_writev], post_writev_hook);
+	(void)syscall_set_post(&syscall_desc[__NR_write], post_write_hook<tag_t>);
+	(void)syscall_set_post(&syscall_desc[__NR_writev], post_writev_hook<tag_t>);
 
 	/* dtracker_mmap.cpp: mmap2(2), munmap(2) */
-	(void)syscall_set_post(&syscall_desc[__NR_mmap2], post_mmap2_hook);
-	(void)syscall_set_post(&syscall_desc[__NR_munmap], post_munmap_hook);
+	(void)syscall_set_post(&syscall_desc[__NR_mmap2], post_mmap2_hook<tag_t>);
+	(void)syscall_set_post(&syscall_desc[__NR_munmap], post_munmap_hook<tag_t>);
 
 
 	/* start the program and return something to make the compiler happy */

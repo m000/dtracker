@@ -1,4 +1,4 @@
-#include "hooks.H"
+#include "hooks/hooks.H"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -8,8 +8,8 @@
 #include "tagmap.h"
 #include "pin.H"
 
-#include "../dtracker.H"
-#include "../osutils.H"
+#include "dtracker.H"
+#include "osutils.H"
 
 
 /*
@@ -17,7 +17,8 @@
  *
  * Signature: ssize_t read(int fd, void *buf, size_t count);
  */
-void post_read_hook(syscall_ctx_t *ctx) {
+template<>
+void post_read_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	/* not successful; optimized branch; errno message may be incorrect */
 	if (unlikely((long)ctx->ret < 0)) {
 		LOG("Error reading from fd" + D_ARG2STR(SYSCALL_ARG0) + ": " + strerror(errno) + "\n");
@@ -84,7 +85,8 @@ void post_read_hook(syscall_ctx_t *ctx) {
 /*
  * readv(2) handler (taint-source)
  */
-void post_readv_hook(syscall_ctx_t *ctx) {
+template<>
+void post_readv_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	/* iterators */
 	int i;
 	struct iovec *iov;
