@@ -31,6 +31,7 @@ DTRACKER_HOOKS_OBJS		= $(patsubst %.cpp,$(OBJDIR)%$(OBJ_SUFFIX),$(DTRACKER_HOOKS
 
 DTRACKER_OBJS			= $(OBJDIR)dtracker$(OBJ_SUFFIX)\
 						  $(DTRACKER_HOOKS_OBJS)\
+						  $(OBJDIR)provlog$(OBJ_SUFFIX)\
 						  $(OBJDIR)osutils$(OBJ_SUFFIX)\
 						  $(OBJDIR)dtracker_debug$(OBJ_SUFFIX)
 
