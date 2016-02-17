@@ -1,56 +1,30 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <set>
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 
-
-#include <set>
-#include <iostream>
-#include <fstream>
-
-#include "syscall_desc.h"
-#include "tagmap.h"
-#include "pin.H"
+/* DataTracker includes. */
+#include "provlog.H"
+#include "dtracker.H"
+#include "hooks/hooks.H"
 #include "osutils.H"
 
-#include "hooks/hooks.H"
-#include "dtracker.H"
+/* libdft includes. */
+#include "syscall_desc.h"
+#include "tagmap.h"
+
+/* Pin includes. */
+#include <pin.H>
 
 // #define DTRACKER_DEBUG
 #include "dtracker_debug.H" 
 
 /* Syscall descriptors, defined in libdft. */
 extern syscall_desc_t syscall_desc[SYSCALL_MAX];
-
-/* Array that maps fds to ufds.
- * File descriptors are recycled by the OS, so they are not suitable
- * to be used as taint marks. OTH, ufds monotonically increase, so
- * they are unique through the program execution. We use UINT32 for
- * them, which should be sufficient.
- */
-ufdmap_t ufdmap;
-
-/* Set of watched fds - maybe change this to bitset? */
-std::set<int> fdset;
-
-/* Counters for stdin/stdout/stderr.
- * TODO: Maybe this should be generalized. I.e. maintain counters for
- * all fds where isatty(fd) returns true.
- */
-off_t stdcount[STDFD_MAX];
-
-/* Raw provenance output stream. */
-std::ofstream rawProvStream;
-
-/* Current executable name and pid.
- * XXX: Check if this works correctly while following execv().
- */
-std::string exename("N/A");
-pid_t pid;
-
 
 /* Pin knob for setting the raw prov output file */
 static KNOB<string> ProvRawKnob(KNOB_MODE_WRITEONCE, "pintool", "o",
@@ -68,14 +42,12 @@ static KNOB<string> TrackStderr(KNOB_MODE_WRITEONCE, "pintool", "stderr",
 	"0", "Log the taint tag data for stderr."
 );
 
-
-
 /*
  * Called when a new image is loaded.
  * Currently only acts when the main executable is loaded to set exename global.
  */
 static void ImageLoad(IMG img, VOID * v) {
-	// XXX: check if this works correctly when execv() is used.
+	// TODO: check if this works correctly when execv() is used.
 	if (IMG_IsMainExecutable(img)) {
 		exename = path_resolve(IMG_Name(img));
 		pid = getpid();
@@ -198,3 +170,4 @@ err:
 	return EXIT_FAILURE;
 }
 
+/* vim: set noet ts=4 sts=4 sw=4 ai ft=make : */
