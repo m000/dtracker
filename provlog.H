@@ -61,8 +61,10 @@ typedef struct {
 #define S_ARG2STR(argspec) (std::string((char *)ctx->arg[argspec]))
 #define D_ARG2STR(argspec) decstr(ctx->arg[argspec])
 
+namespace PROVLOG {
+
 /* inline functions for raw provenance logging */
-static inline void PROVLOG_OPEN(const ufd_t ufd, const std::string & fdname, const int flags, const int created) {
+static inline void open(const ufd_t ufd, const std::string & fdname, const int flags, const int created) {
 	rawProvStream << "o:ufd" << ufd << ":" << fdname << std::endl;
 
 	// Unless the the O_WRONLY flag is on, the file descriptor can be read.
@@ -91,10 +93,10 @@ static inline void PROVLOG_OPEN(const ufd_t ufd, const std::string & fdname, con
 	// TODO: (low urgency) emit a truncation line if O_TRUNC is included
 	//	     in the flags
 }
-static inline void PROVLOG_CLOSE(const ufd_t ufd) {
+static inline void close(const ufd_t ufd) {
 	rawProvStream << "c:ufd" << ufd << std::endl;
 }
-static inline void PROVLOG_EXEC(const std::string & exename, pid_t pid) {
+static inline void exec(const std::string & exename, pid_t pid) {
 	rawProvStream << "x:" << pid << ":" << exename << std::endl;
 }
 // static inline void PROVLOG_WRITE_RANGE(const ufd_t ofd, const off_t write_begin, const range_map_t::key_type last, const range_map_t::mapped_type & info) {
@@ -114,6 +116,9 @@ static inline void PROVLOG_EXEC(const std::string & exename, pid_t pid) {
 	// 		break;
 	// }
 // }
+
+} // namespace PROVLOG
+
 #endif
 
 /* vim: set noet ts=4 sts=4 sw=4 ai ft=make : */

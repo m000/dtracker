@@ -51,7 +51,7 @@ static void ImageLoad(IMG img, VOID * v) {
 	if (IMG_IsMainExecutable(img)) {
 		exename = path_resolve(IMG_Name(img));
 		pid = getpid();
-		PROVLOG_EXEC(exename, pid);
+		PROVLOG::exec(exename, pid);
 
 		// Add stdin/stdout/stderr to watched file descriptors.
 		// This should take place while loading the image in order to have 
@@ -61,21 +61,21 @@ static void ImageLoad(IMG img, VOID * v) {
 			std::string fdn = fdname(STDIN_FILENO);
 			fdset.insert(STDIN_FILENO);
 			LOG( "Watching fd" + decstr(STDIN_FILENO) + " (" + fdn + ").\n");
-			PROVLOG_OPEN(ufd, fdn, fcntl(STDIN_FILENO, F_GETFL), 0);
+			PROVLOG::open(ufd, fdn, fcntl(STDIN_FILENO, F_GETFL), 0);
 		}
 		if ( atoi(TrackStdout.Value().c_str()) ) {
 			ufd_t ufd = ufdmap.get(STDOUT_FILENO);
 			std::string fdn = fdname(STDOUT_FILENO);
 			fdset.insert(STDOUT_FILENO);
 			LOG( "Watching fd" + decstr(STDOUT_FILENO) + " (" + fdn + ").\n");
-			PROVLOG_OPEN(ufd, fdn, fcntl(STDOUT_FILENO, F_GETFL), 0);
+			PROVLOG::open(ufd, fdn, fcntl(STDOUT_FILENO, F_GETFL), 0);
 		}	
 		if ( atoi(TrackStderr.Value().c_str()) ) {
 			ufd_t ufd = ufdmap.get(STDERR_FILENO);
 			std::string fdn = fdname(STDERR_FILENO);
 			fdset.insert(STDERR_FILENO);
 			LOG( "Watching fd" + decstr(STDERR_FILENO) + " (" + fdn + ").\n");
-			PROVLOG_OPEN(ufd, fdn, fcntl(STDERR_FILENO, F_GETFL), 0);
+			PROVLOG::open(ufd, fdn, fcntl(STDERR_FILENO, F_GETFL), 0);
 		}
 	}
 }
@@ -91,7 +91,7 @@ static void OnExit(INT32, void *) {
 	for ( auto &fd : fdset ) {
 		ufd_t ufd = ufdmap.get(fd);
 		ufdmap.del(fd);
-		PROVLOG_CLOSE(ufd);
+		PROVLOG::close(ufd);
 	}
 }
 
