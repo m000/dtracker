@@ -26,10 +26,10 @@
 /* Array that maps fds to ufds. */
 typedef UINT32 ufd_t;
 typedef struct {
-    std::array<ufd_t, MAX_OPEN_FILES> map;
-    ufd_t next = 1;
-    decltype(map[0]) get(int fd){ if (map[fd]==0) map[fd] = next++; return map[fd]; }
-    void del(int fd) { map[fd] = 0; }
+	std::array<ufd_t, MAX_OPEN_FILES> map;
+	ufd_t next = 1;
+	decltype(map[0]) get(int fd){ if (map[fd]==0) map[fd] = next++; return map[fd]; }
+	void del(int fd) { map[fd] = 0; }
 } ufdmap_t;
 extern ufdmap_t ufdmap;
 
@@ -55,11 +55,6 @@ typedef struct {
 } range_info_t;
 // static const char * range_type_strings[] = { "NONE", "SEQ", "REP" };
 // typedef std::map<tag_traits<tag_t>::inner_type, range_info_t> range_map_t;
-
-/* macros for converting syscall arguments to printable stuff */
-// not used much - we assign values to constants instead of using macros
-#define S_ARG2STR(argspec) (std::string((char *)ctx->arg[argspec]))
-#define D_ARG2STR(argspec) decstr(ctx->arg[argspec])
 
 namespace PROVLOG {
 
@@ -90,8 +85,7 @@ static inline void open(const ufd_t ufd, const std::string & fdname, const int f
 		}
 	}
 	
-	// TODO: (low urgency) emit a truncation line if O_TRUNC is included
-	//	     in the flags
+	// TODO: (low urgency) emit a truncation line if O_TRUNC is included in the flags
 }
 static inline void close(const ufd_t ufd) {
 	rawProvStream << "c:ufd" << ufd << std::endl;
@@ -121,4 +115,4 @@ static inline void exec(const std::string & exename, pid_t pid) {
 
 #endif
 
-/* vim: set noet ts=4 sts=4 sw=4 ai ft=make : */
+/* vim: set noet ts=4 sts=4 sw=4 ai : */
