@@ -12,7 +12,6 @@
 #include "dtracker.H"
 #include "osutils.H"
 
-
 /*
  * read(2) handler (taint-source)
  *
@@ -22,7 +21,7 @@ template<>
 void post_read_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 	/* not successful; optimized branch; errno message may be incorrect */
 	if (unlikely((long)ctx->ret < 0)) {
-		LOG("Error reading from fd" + D_ARG2STR(SYSCALL_ARG0) + ": " + strerror(errno) + "\n");
+		LOG("Error reading from fd" + decstr(ctx->arg[SYSCALL_ARG0]) + ": " + strerror(errno) + "\n");
 		return;
 	}
 
@@ -127,4 +126,4 @@ void post_readv_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 		}
 }
 
-/* vim: set noet ts=4 sts=4 sw=4 ai ft=make : */
+/* vim: set noet ts=4 sts=4 sw=4 ai : */

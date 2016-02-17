@@ -59,7 +59,7 @@ void post_open_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 
 		LOG("OK    " _CALL_LOG_STR + "\n");
 		LOG("INFO  mapped fd" + decstr(_FD) + ":ufd" + decstr(ufd) + "\n");
-		PROVLOG_OPEN(ufd, fdn, _FLAGS, created);
+		PROVLOG::open(ufd, fdn, _FLAGS, created);
 	}
 	else {
 		LOG("INFO  ignoring fd" + decstr(_FD) + " (" + fdn + ")\n");
@@ -98,9 +98,9 @@ void post_close_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 	if (IS_STDFD(_FD)) stdcount[_FD] = 0;
 
 	LOG("INFO  removed mapping fd" + decstr(_FD) + ":ufd" + decstr(ufd) + "\n");
-	PROVLOG_CLOSE(ufd);
+	PROVLOG::close(ufd);
 }
 #define UNDEF_SYSCALL_CLOSE
 #include "hooks/syscall_args.h"
 
-/* vim: set noet ts=4 sts=4 sw=4 ai ft=make : */
+/* vim: set noet ts=4 sts=4 sw=4 ai : */
