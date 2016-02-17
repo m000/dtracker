@@ -33,7 +33,7 @@ void post_read_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 
 	if (fdset.find(fd) != fdset.end()) {
 		/* set tags on read bytes */
-		const ufd_t ufd = ufdmap.get(fd);
+		PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(fd);
 		off_t read_offset_start = 0;
 		size_t i = 0;
 

@@ -53,7 +53,7 @@ void post_write_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 
 	LOG("OK    " _CALL_LOG_STR + "\n");
 
-	const ufd_t ufd = ufdmap.get(_FD);
+	const PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(_FD);
 	off_t write_begin;
 
 	/* calculate begining of write */

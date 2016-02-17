@@ -40,7 +40,7 @@ void post_mmap2_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 		LOG("OK    " _CALL_LOG_STR + "\n");
 
 		/* set tags on mapped area */
-		const ufd_t ufd = ufdmap.get(_FD);
+		const PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(_FD);
 		size_t i = 0;
 
 		while(i<_LENGTH) {
