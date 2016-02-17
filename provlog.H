@@ -22,16 +22,38 @@
 
 
 /**** data types and externals ************************************/
-// namespace?
-/* Array that maps fds to ufds. */
+namespace PROVLOG {
+
 typedef UINT32 ufd_t;
-typedef struct {
-	std::array<ufd_t, MAX_OPEN_FILES> map;
-	ufd_t next = 1;
-	decltype(map[0]) get(int fd){ if (map[fd]==0) map[fd] = next++; return map[fd]; }
-	void del(int fd) { map[fd] = 0; }
-} ufdmap_t;
-extern ufdmap_t ufdmap;
+
+/*
+ * UFDMap maps program fds (as used by the program) to ufds.
+ * Normal fds are not suitable for use as taint marks in taint flow
+ * analysis becaƒuse are "recycled" by the os. This will eventually
+ * lead to misattribution of some data.
+ *
+ * Unlike fds which are recycled by the OS, ufds increase monotonically.
+ * This makes ufds suitable for use in taint flow analysis.
+ */
+class UFDMap {
+	public:
+		ufd_t allocate(int fd) {
+			ufd_t ufd = this->next++;
+			this->map[fd] = ufd;
+			return ufd;
+		}
+		ufd_t release(int fd) {
+			ufd_t ufd = map[fd];
+			map[fd] = 0;
+			return ufd;
+		}
+	private:
+		ufd_t next = 1;
+		std::array<ufd_t, MAX_OPEN_FILES> map;
+};
+
+extern UFDMap ufdmap;
+} // namespace PROVLOG
 
 /* Set of watched fds. */
 extern std::set<int> fdset;
@@ -45,7 +67,6 @@ extern std::ofstream rawProvStream;
 /* Current executable name and pid. */
 extern std::string exename;
 extern pid_t pid;
-
 
 /**** output macros and inlines ***********************************/
 typedef struct {

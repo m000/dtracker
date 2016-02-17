@@ -1,12 +1,10 @@
 #include "provlog.H"
 
-/* Array that maps fds to ufds.
- * File descriptors are recycled by the OS, so they are not suitable
- * to be used as taint marks. OTH, ufds monotonically increase, so
- * they are unique through the program execution. We use UINT32 for
- * them, which should be sufficient.
+/* Array that maps fds to ufds. Unlike fds which are recycled, ufds
+ * increase monotonically. This makes them suitable for use as taint
+ * marks.
  */
-ufdmap_t ufdmap;
+PROVLOG::UFDMap ufdmap;
 
 /* Set of watched fds - maybe change this to bitset? */
 std::set<int> fdset;
