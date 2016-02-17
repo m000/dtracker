@@ -223,3 +223,4 @@ void post_writev_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 	LOG("Writev. Not supported yet.\n");
 }
 
+/* vim: set noet ts=4 sts=4 sw=4 ai : */

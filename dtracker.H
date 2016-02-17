@@ -14,10 +14,10 @@
 
 /* compiler directives for branch prediction */
 #if !defined(likely)
-#define likely(x)       __builtin_expect((x), 1)
+#define likely(x)	__builtin_expect((x), 1)
 #endif
 #if !defined(unlikely)
-#define unlikely(x)     __builtin_expect((x), 0)
+#define unlikely(x)	__builtin_expect((x), 0)
 #endif
 
 /**** debugging macros and inlines ********************************/
@@ -30,4 +30,4 @@
 
 #endif
 
-/* vim: set noet ts=4 sts=4 sw=4 ai ft=make : */
+/* vim: set noet ts=4 sts=4 sw=4 ai : */

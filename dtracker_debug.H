@@ -17,9 +17,9 @@ inline std::string tag_memrange_sprint(ADDRINT addr, size_t n) {
 	for (i=0; i<n-1; i++) {
 		ss << i << ":" << tag_sprint(tagmap_getb(addr+i)) << ", ";
 	}
-    ss << i << ":" << tag_sprint(tagmap_getb(addr+i)) << "]";
+	ss << i << ":" << tag_sprint(tagmap_getb(addr+i)) << "]";
 
-    return ss.str();
+	return ss.str();
 }
 
 inline int debug_gotmagic_backward(const void * const pt) {
@@ -40,3 +40,5 @@ inline int debug_gotmagic_forward(const void * const pt) {
 
 void CheckMagicValue(INS ins, void *v);
 #endif
+
+/* vim: set noet ts=4 sts=4 sw=4 ai : */

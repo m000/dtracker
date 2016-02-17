@@ -46,47 +46,47 @@
 /// @return 1 if the filename is whitelisted. 0 otherwise.
 ///
 inline int in_dtracker_whitelist(const std::string & fname) {
-    // Note: basename() and dirname() may modify their arguments.
-    //       For this, we create a duplicate of fname to give them.
-    //       Also their return value should not be freed because it
-    //       is either a pointer into fname or statically allocated.
-    char *fdup;
+	// Note: basename() and dirname() may modify their arguments.
+	//       For this, we create a duplicate of fname to give them.
+	//       Also their return value should not be freed because it
+	//       is either a pointer into fname or statically allocated.
+	char *fdup;
 
-    // Check file patterns.
-    if (DTRACKER_FILE_WHITELIST_RE != NULL && (fdup = strdup(fname.c_str()))) {
-        int status = -1;
-        regex_t re;
-        char *bname = basename(fdup);
-        
-        if (regcomp(&re, DTRACKER_FILE_WHITELIST_RE, REG_EXTENDED|REG_NOSUB) == 0) {
-            status = regexec(&re, bname, (size_t) 0, NULL, 0);
-            regfree(&re);
-        }
-        free(fdup);
-        if (status == 0) return 1;
-    }
+	// Check file patterns.
+	if (DTRACKER_FILE_WHITELIST_RE != NULL && (fdup = strdup(fname.c_str()))) {
+		int status = -1;
+		regex_t re;
+		char *bname = basename(fdup);
 
-    // Check dir patterns.
-    if (DTRACKER_PATH_WHITELIST_RE != NULL && (fdup = strdup(fname.c_str()))) {
-        int status = -1;
-        regex_t re;
+		if (regcomp(&re, DTRACKER_FILE_WHITELIST_RE, REG_EXTENDED|REG_NOSUB) == 0) {
+			status = regexec(&re, bname, (size_t) 0, NULL, 0);
+			regfree(&re);
+		}
+		free(fdup);
+		if (status == 0) return 1;
+	}
 
-        // We have to do this crap because dirname() does not append a /.
-        char *dname_noslash = dirname(fdup);
-        size_t dname_sz = (strlen(dname_noslash)+2)*sizeof(char);
-        char *dname = (char *)malloc(dname_sz);
-        
-        if (dname != NULL && regcomp(&re, DTRACKER_PATH_WHITELIST_RE, REG_EXTENDED|REG_NOSUB) == 0) {
-            snprintf(dname, dname_sz, "%s/", dname_noslash);
-            status = regexec(&re, dname, (size_t) 0, NULL, 0);
-            regfree(&re);
-            free(dname);
-        }
-        free(fdup);
-        if (status == 0) return 1;
-    }
+	// Check dir patterns.
+	if (DTRACKER_PATH_WHITELIST_RE != NULL && (fdup = strdup(fname.c_str()))) {
+		int status = -1;
+		regex_t re;
 
-    return 0;
+		// We have to do this crap because dirname() does not append a /.
+		char *dname_noslash = dirname(fdup);
+		size_t dname_sz = (strlen(dname_noslash)+2)*sizeof(char);
+		char *dname = (char *)malloc(dname_sz);
+
+		if (dname != NULL && regcomp(&re, DTRACKER_PATH_WHITELIST_RE, REG_EXTENDED|REG_NOSUB) == 0) {
+			snprintf(dname, dname_sz, "%s/", dname_noslash);
+			status = regexec(&re, dname, (size_t) 0, NULL, 0);
+			regfree(&re);
+			free(dname);
+		}
+		free(fdup);
+		if (status == 0) return 1;
+	}
+
+	return 0;
 }
 
 
@@ -100,37 +100,37 @@ inline int in_dtracker_whitelist(const std::string & fname) {
 /// @return A string representing the absolute path to the file or NULL.
 inline std::string path_resolve(const std::string & path) {
 #if defined(TARGET_LINUX) || defined(TARGET_MAC)
-    char *crval = realpath(path.c_str(), NULL);
-    if (crval != NULL) {
-        std::string rval(crval);
-        free(crval);
-        return rval;
-    }
-    else {
-        return NULL;
-    }
+	char *crval = realpath(path.c_str(), NULL);
+	if (crval != NULL) {
+		std::string rval(crval);
+		free(crval);
+		return rval;
+	}
+	else {
+		return NULL;
+	}
 #elif defined(TARGET_WINDOWS)
-    assert(0);
-    return NULL;
+	assert(0);
+	return NULL;
 #endif
 }
 
 inline int path_isdir(const std::string & path) {
 #if defined(TARGET_LINUX) || defined(TARGET_MAC)
-    struct stat stats;
-    return (stat(path.c_str(), &stats) == 0 && S_ISDIR(stats.st_mode));
+	struct stat stats;
+	return (stat(path.c_str(), &stats) == 0 && S_ISDIR(stats.st_mode));
 #elif defined(TARGET_WINDOWS)
-    assert(0);
-    return -1;
+	assert(0);
+	return -1;
 #endif
 }
 
 inline int path_exists(const std::string & path) {
 #if defined(TARGET_LINUX) || defined(TARGET_MAC)
-    return (access(path.c_str(), F_OK) == 0);
+	return (access(path.c_str(), F_OK) == 0);
 #elif defined(TARGET_WINDOWS)
-    assert(0);
-    return -1;
+	assert(0);
+	return -1;
 #endif
 }
 
@@ -146,3 +146,5 @@ inline int path_exists(const std::string & path) {
 /// @return A string representing the full path to the file.
 std::string fdname(int fd);
 #endif
+
+/* vim: set noet ts=4 sts=4 sw=4 ai : */

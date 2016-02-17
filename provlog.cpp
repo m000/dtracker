@@ -26,4 +26,4 @@ std::ofstream rawProvStream;
 std::string exename("N/A");
 pid_t pid;
 
-/* vim: set noet ts=4 sts=4 sw=4 ai ft=make : */
+/* vim: set noet ts=4 sts=4 sw=4 ai : */
