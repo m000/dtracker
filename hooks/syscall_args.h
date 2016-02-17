@@ -10,12 +10,12 @@
  * because that is what we use in practice.
  *
  * Usage example:
- *     #define DEF_SYSCALL_X
- *     #include "syscall_args.h"
- *     void pre_X_hook(syscall_ctx_t *ctx) { ... }
- *     void post_X_hook(syscall_ctx_t *ctx) { ... }
- *     #define UNDEF_SYSCALL_X
- *     #include "syscall_args.h"
+ *		 #define DEF_SYSCALL_X
+ *		 #include "syscall_args.h"
+ *		 void pre_X_hook(syscall_ctx_t *ctx) { ... }
+ *		 void post_X_hook(syscall_ctx_t *ctx) { ... }
+ *		 #define UNDEF_SYSCALL_X
+ *		 #include "syscall_args.h"
  *
  * In addition to argument macros, we also define the _CALL_LOG_STR
  * which merges the arguments in a format suitable to be used with 
@@ -167,4 +167,4 @@
 #undef UNDEF_SYSCALL_WRITE
 #endif
 
-/* vim: set noet ts=4 sts=4 sw=4 ai ft=make : */
+/* vim: set noet ts=4 sts=4 sw=4 ai : */

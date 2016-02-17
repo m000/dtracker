@@ -101,3 +101,5 @@ void post_close_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 }
 #define UNDEF_SYSCALL_CLOSE
 #include "hooks/syscall_args.h"
+
+/* vim: set noet ts=4 sts=4 sw=4 ai : */

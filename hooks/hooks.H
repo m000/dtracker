@@ -26,3 +26,5 @@ template<typename TagType> void post_munmap_hook(syscall_ctx_t *ctx);
 template<typename TagType> void post_mremap_hook(syscall_ctx_t *ctx);
 
 #endif
+
+/* vim: set noet ts=4 sts=4 sw=4 ai : */
