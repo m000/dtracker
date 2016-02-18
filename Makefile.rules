@@ -28,7 +28,7 @@ $(OBJDIR)dtracker$(OBJ_SUFFIX): dtracker.cpp | $(OBJDIR)hooks
 	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
 
 $(OBJDIR)dtracker$(PINTOOL_SUFFIX): $(OBJDIR)dtracker$(OBJ_SUFFIX) $(OBJDIR)osutils$(OBJ_SUFFIX) $(DTRACKER_HOOKS) $(DTRACKER_DEBUG)
-	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$@ $(^:%.h=) $(TOOL_LPATHS) $(TOOL_LIBS) -L$(LIBDFT_PATH) -ldft
+	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$@ $(^:%.h=) $(TOOL_LPATHS) -L$(LIBDFT_PATH) -ldft $(TOOL_LIBS)
 
 #######################################################################
 # jsoncpp
