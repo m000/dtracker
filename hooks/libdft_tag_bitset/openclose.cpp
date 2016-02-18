@@ -48,7 +48,7 @@ void post_open_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 	const std::string fdn = fdname(_FD);
 
 	if ( !in_dtracker_whitelist(fdn) && !path_isdir(fdn) ) {
-		const PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(_FD);
+		const PROVLOG::ufd_t ufd = PROVLOG::ufdmap[_FD];
 		fdset.insert(_FD);
 
 		int created = (
@@ -90,11 +90,11 @@ void post_close_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 
 	std::set<int>::iterator it = fdset.find(_FD);
 	if (it == fdset.end()) return;
-	const PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(_FD);
+	const PROVLOG::ufd_t ufd = PROVLOG::ufdmap[_FD];
 
 
 	fdset.erase(it);
-	PROVLOG::ufdmap.release(_FD);
+	PROVLOG::ufdmap.del(_FD);
 	if (IS_STDFD(_FD)) stdcount[_FD] = 0;
 
 	LOG("INFO  removed mapping fd" + decstr(_FD) + ":ufd" + decstr(ufd) + "\n");

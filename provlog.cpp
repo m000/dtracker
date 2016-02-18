@@ -4,7 +4,7 @@
  * increase monotonically. This makes them suitable for use as taint
  * marks.
  */
-PROVLOG::UFDMap ufdmap;
+PROVLOG::UFDMap PROVLOG::ufdmap;
 
 /* Set of watched fds - maybe change this to bitset? */
 std::set<int> fdset;
@@ -16,7 +16,7 @@ std::set<int> fdset;
 off_t stdcount[STDFD_MAX];
 
 /* Raw provenance output stream. */
-std::ofstream rawProvStream;
+std::ofstream PROVLOG::rawProvStream;
 
 /* Current executable name and pid.
  * XXX: Check if this works correctly while following execv().

@@ -1,7 +1,8 @@
 #include "hooks/hooks.H"
 
-#include <map>
-#include <set>
+// #include <map>
+// #include <set>
+#include <array>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -53,7 +54,7 @@ void post_write_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 
 	LOG("OK    " _CALL_LOG_STR + "\n");
 
-	const PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(_FD);
+	const PROVLOG::ufd_t ufd = PROVLOG::ufdmap[_FD];
 	off_t write_begin;
 
 	/* calculate begining of write */
@@ -69,24 +70,39 @@ void post_write_hook<libdft_tag_bitset>(syscall_ctx_t *ctx) {
 		}
 	}
 
+	// Range aggregation. Only NONE/REP ranges make sense for libdft_tag_bitset.
+	// In ranges[j] we keep the offset where tag[j] was first marked present.
+	// A REP range is dumped the first time when tag[j] is not present again.
+	INT32 *ranges = new INT32[TAG_BITSET_SIZE];
+	std::fill(ranges, ranges+TAG_BITSET_SIZE, -1);
+
 	for(ssize_t i=0; i<_N_WRITTEN; i++) { //loop through memory locations
 		tag_t tag = tagmap_getb(_BUF+i);
-
 		for(unsigned int j=0; j<tag.size(); j++) {
-			if (!tag[j]) continue;
-std::cout<<ufd<<std::endl;
-			// PROVLOG_WRITE_RANGE(ufd, write_begin, 1, range_info_t::NONE);
+			if (tag[j]) {
+				if (ranges[j] < 0) {
+					// no range active for j - start one
+					std::cout << "range at " << write_begin+i << std::endl;
+					ranges[j] = write_begin+i;
+				}
+				else {
+					// range already running - do nothing
+					continue;
+				}
+			}
+			else if (ranges[j] >= 0) {
+				// range end - output data and reset it
+				PROVLOG::write(j, ufd, ranges[j], write_begin+i-ranges[j]);
+				ranges[j] = -1;
+			}
 		}
-
-// #ifdef __DEBUG_SYSCALL_WRITE
-// 		LOG("---------------------- " + std::string((char *)(_BUF+i), 1) + "\n");
-// 		LOG("RANGES " + __RANGE2STR(ranges) + "\n");
-// 		LOG("RANGES_PREV " + __RANGE2STR(ranges_prev) + "\n");
-// #endif
-
-
 	} //loop memory locations
-
+	for(unsigned int j=0; j<TAG_BITSET_SIZE; j++) {
+		// dump ranges active
+		if (ranges[j] >= 0)
+			PROVLOG::write(j, ufd, ranges[j], _N_WRITTEN-ranges[j]);
+	}
+	delete ranges;
 }
 #define UNDEF_SYSCALL_WRITE
 #include "hooks/syscall_args.h"
