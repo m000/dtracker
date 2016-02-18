@@ -57,21 +57,21 @@ static void ImageLoad(IMG img, VOID * v) {
 		// This should take place while loading the image in order to have 
 		// exename available.
 		if ( atoi(TrackStdin.Value().c_str()) ) {
-			PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(STDIN_FILENO);
+			PROVLOG::ufd_t ufd = PROVLOG::ufdmap[STDIN_FILENO];
 			std::string fdn = fdname(STDIN_FILENO);
 			fdset.insert(STDIN_FILENO);
 			LOG( "Watching fd" + decstr(STDIN_FILENO) + " (" + fdn + ").\n");
 			PROVLOG::open(ufd, fdn, fcntl(STDIN_FILENO, F_GETFL), 0);
 		}
 		if ( atoi(TrackStdout.Value().c_str()) ) {
-			PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(STDOUT_FILENO);
+			PROVLOG::ufd_t ufd = PROVLOG::ufdmap[STDOUT_FILENO];
 			std::string fdn = fdname(STDOUT_FILENO);
 			fdset.insert(STDOUT_FILENO);
 			LOG( "Watching fd" + decstr(STDOUT_FILENO) + " (" + fdn + ").\n");
 			PROVLOG::open(ufd, fdn, fcntl(STDOUT_FILENO, F_GETFL), 0);
 		}	
 		if ( atoi(TrackStderr.Value().c_str()) ) {
-			PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(STDERR_FILENO);
+			PROVLOG::ufd_t ufd = PROVLOG::ufdmap[STDERR_FILENO];
 			std::string fdn = fdname(STDERR_FILENO);
 			fdset.insert(STDERR_FILENO);
 			LOG( "Watching fd" + decstr(STDERR_FILENO) + " (" + fdn + ").\n");
@@ -89,8 +89,8 @@ static void OnExit(INT32, void *) {
 	 * Don't you love the c++11 loop syntax? 
 	 */
 	for ( auto &fd : fdset ) {
-		PROVLOG::ufd_t ufd = PROVLOG::ufdmap.allocate(fd);
-		PROVLOG::ufdmap.release(fd);
+		PROVLOG::ufd_t ufd = PROVLOG::ufdmap[fd];
+		PROVLOG::ufdmap.del(fd);
 		PROVLOG::close(ufd);
 	}
 }
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 
 	// Open raw prov file.
 	// This file is to be post-processed to get the data in a proper format.
-	rawProvStream.open(ProvRawKnob.Value().c_str());
+	PROVLOG::rawProvStream.open(ProvRawKnob.Value().c_str());
 
 
 	/*

@@ -37,12 +37,12 @@ typedef UINT32 ufd_t;
  */
 class UFDMap {
 	public:
-		ufd_t allocate(int fd) {
-			ufd_t ufd = this->next++;
-			this->map[fd] = ufd;
-			return ufd;
+		ufd_t operator[](int fd) {
+			if (this->map[fd] == 0)
+				this->map[fd] = this->next++;
+			return this->map[fd];
 		}
-		ufd_t release(int fd) {
+		ufd_t del(int fd) {
 			ufd_t ufd = map[fd];
 			map[fd] = 0;
 			return ufd;
@@ -61,9 +61,6 @@ extern std::set<int> fdset;
 /* Counters for stdin/stdout/stderr. */
 extern off_t stdcount[STDFD_MAX];
 
-/* Raw provenance output stream. */
-extern std::ofstream rawProvStream;
-
 /* Current executable name and pid. */
 extern std::string exename;
 extern pid_t pid;
@@ -74,10 +71,13 @@ typedef struct {
 	ssize_t start;
 	ssize_t length;
 } range_info_t;
-// static const char * range_type_strings[] = { "NONE", "SEQ", "REP" };
+static const char * range_type_strings[] = { "NONE", "SEQ", "REP" };
 // typedef std::map<tag_traits<tag_t>::inner_type, range_info_t> range_map_t;
 
 namespace PROVLOG {
+
+/* Raw provenance output stream. */
+extern std::ofstream rawProvStream;
 
 /* inline functions for raw provenance logging */
 static inline void open(const ufd_t ufd, const std::string & fdname, const int flags, const int created) {
@@ -114,6 +114,17 @@ static inline void close(const ufd_t ufd) {
 static inline void exec(const std::string & exename, pid_t pid) {
 	rawProvStream << "x:" << pid << ":" << exename << std::endl;
 }
+
+// used for DLIBDFT_TAG_TYPE=libdft_tag_bitset
+static inline void write(const ufd_t ufd_origin, const ufd_t ufd_dest, const off_t write_begin, const off_t length) {
+	const char *range_type = length > 1 ? range_type_strings[range_info_t::REP] : range_type_strings[range_info_t::NONE];
+	rawProvStream << "w:" << range_type <<
+		":ufd" << ufd_dest << ":" << write_begin <<
+		":ufd" << ufd_origin << ":" << 0 <<
+		":" << length << std::endl;
+}
+
+// used for DLIBDFT_TAG_TYPE=libdft_tag_set_fdoff
 // static inline void PROVLOG_WRITE_RANGE(const ufd_t ofd, const off_t write_begin, const range_map_t::key_type last, const range_map_t::mapped_type & info) {
 	// switch(info.type) {
 	// 	case range_info_t::SEQ:
