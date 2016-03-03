@@ -28,7 +28,7 @@ index d615935..00c6883 100755
 +         my $dtdl = abs_path(dirname($bin_dir) . "/../../../obj-ia32/dtracker.so");
 +         my $provout = $bin_file . ".out";
 +
-+         my $dtwrap_fmt = "pin.sh -t %s -o %s -stdin %d -stdout %d -stderr %d -- %s";
++         my $dtwrap_fmt = "pin.sh -follow_execv -t %s -o %s -stdin %d -stdout %d -stderr %d -- %s";
 +         my $dtwrap = sprintf($dtwrap_fmt, $dtdl, $provout, 1, 1, 1, $cmd);
 +
 +         $cmd = $dtwrap;
