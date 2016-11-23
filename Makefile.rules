@@ -10,7 +10,8 @@ SUPPORT_REL_PATH	= ./support
 SUPPORT_PATH		= $(realpath $(SUPPORT_REL_PATH))
 LIBDFT_PATH			= $(realpath $(SUPPORT_PATH)/libdft/src)
 #LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_set_fdoff
-LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_bitset -DTAG_BITSET_SIZE=32
+#LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_bitset -DTAG_BITSET_SIZE=32
+LIBDFT_TAG_FLAGS	?= -DLIBDFT_TAG_TYPE=libdft_tag_bvector
 
 # Turns pintool.log output off.
 LOGGING_FLAGS = -DNO_PINTOOL_LOG
@@ -45,7 +46,7 @@ $(OBJDIR)dtracker$(PINTOOL_SUFFIX): $(DTRACKER_OBJS)
 #######################################################################
 # Directories.
 #######################################################################
-$(OBJDIR)%:
+$(OBJDIR)hooks/$(DTRACKER_HOOKS_ACTIVE):
 	mkdir -p $@
 
 #######################################################################
