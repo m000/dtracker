@@ -47,7 +47,6 @@ static KNOB<string> TrackStderr(KNOB_MODE_WRITEONCE, "pintool", "stderr",
  * Currently only acts when the main executable is loaded to set exename global.
  */
 static void ImageLoad(IMG img, VOID * v) {
-	// TODO: check if this works correctly when execv() is used.
 	if (IMG_IsMainExecutable(img)) {
 		exename = path_resolve(IMG_Name(img));
 		pid = getpid();
@@ -77,6 +76,7 @@ static void ImageLoad(IMG img, VOID * v) {
 			LOG( "Watching fd" + decstr(STDERR_FILENO) + " (" + fdn + ").\n");
 			PROVLOG::open(ufd, fdn, fcntl(STDERR_FILENO, F_GETFL), 0);
 		}
+		// TODO: Do we need to wash taint at this point?
 	}
 }
 
