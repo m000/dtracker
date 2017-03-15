@@ -1,5 +1,5 @@
-#ifndef __HOOKS_H__
-#define __HOOKS_H__
+#ifndef DTRACKER_HOOKS_H
+#define DTRACKER_HOOKS_H
 /*
  * Syscall Hooks. Each hook must be specialized for each supported tag type.
  */

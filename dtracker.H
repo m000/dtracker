@@ -1,5 +1,5 @@
-#ifndef __DTRACKER_H__
-#define __DTRACKER_H__
+#ifndef DTRACKER_H
+#define DTRACKER_H
 
 /**** generic macros and definitions ******************************/
 #define BOOL(x) ((x) ? 1 : 0)
