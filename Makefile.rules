@@ -56,8 +56,7 @@ SUPPORT_VARS += CXX="$(CXX)" CXXFLAGS="$(TOOL_CXXFLAGS)"
 
 .PHONY: support-%
 support-%:
-	export LIBDFT_TAG_FLAGS
-	$(MAKE) -C support -f makefile.$*
+	LIBDFT_TAG_FLAGS="$(LIBDFT_TAG_FLAGS)" $(MAKE) -C support -f makefile.$*
 
 .PHONY: help
 help:

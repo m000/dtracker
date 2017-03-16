@@ -10,7 +10,7 @@ all: libdft
 
 .PHONY: libdft
 libdft: $(LIBDFT_SRC)
-	cd $< && CPPFLAGS=$(CPPFLAGS) make
+	cd $< && CPPFLAGS="$(CPPFLAGS)" make
 
 .PHONY: clean
 clean: $(LIBDFT_SRC)
