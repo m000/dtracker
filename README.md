@@ -12,18 +12,21 @@ Presentation slides available upon request.
 
 Requirements
 -------------
-DataTracker runs on 32bit Linux systems. This limitation is imposed by the current version of libdft. However, the methods of both software are not platform-specific. So, in principle, they can be ported on any platform supported by Intel Pin. The requirements for running DataTracker are:
+DataTracker can work with 32bit Linux programs. This limitation is imposed by the current version of libdft. However, the methods of both software are not platform-specific. So, in principle, they can be ported on any platform supported by Intel Pin. The requirements for running DataTracker are:
 
 *  A C++11 compiler and unix build utilities (e.g. GNU Make). 
 *  A recent (>=2.13) version of Intel Pin. The framework must be present in directory ``pin`` inside the DataTracker top directory.
 *  A suitable version of the [modified libdft][libdft-mod] - typically the latest available. This must be placed in directory ``support/libdft``.
 *  Python 2.7 for converting raw provenance to [PROV][prov] format in [Turtle][turtle] syntax.
 
-
-
 Installation
 -------------
 After cloning DataTracker, follow these steps to compile it.
+
+**Multiarch setup (intel64 only):**
+On intel64 (a.k.a. x86\_64) hosts, DataTracker and libdft need to be cross-compiled to ia32.
+For this, you will need a working multiarch setup.
+[Google](http://www.google.com) and [serverfault](https://serverfault.com/) are your friends for this.
 
 **Build environment:**
 On Debian/Ubuntu systems, you should install ``build-essential`` meta-package which will provide a C++ compiler and GNU Make. On other systems, you should either install some equivalent meta-package or install the tools one by one using trial and error.
