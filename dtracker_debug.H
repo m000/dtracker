@@ -1,5 +1,5 @@
-#ifndef __DTRACKER_DEBUG_H__
-#define __DTRACKER_DEBUG_H__
+#ifndef DTRACKER_DEBUG_H
+#define DTRACKER_DEBUG_H
 
 #include <string>
 #include <sstream>

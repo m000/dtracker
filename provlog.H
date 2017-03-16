@@ -1,5 +1,5 @@
-#ifndef __PROVLOG_H__
-#define __PROVLOG_H__
+#ifndef DTRACKER_PROVLOG_H
+#define DTRACKER_PROVLOG_H
 
 #include <iostream>
 #include <fstream>

@@ -2,8 +2,8 @@
 /// @file
 /// \brief Utility functions with OS-specific implementations.
 ///
-#ifndef __OSUTILS_H__
-#define __OSUTILS_H__
+#ifndef DTRACKER_OSUTILS_H
+#define DTRACKER_OSUTILS_H
 
 #include <iostream>
 #include <string>
