@@ -71,8 +71,10 @@ typedef struct {
 	ssize_t start;
 	ssize_t length;
 } range_info_t;
-static const char * range_type_strings[] = { "NONE", "SEQ", "REP" };
-// typedef std::map<tag_traits<tag_t>::inner_type, range_info_t> range_map_t;
+static const char * range_type_strings[] __attribute__((unused)) = { "NONE", "SEQ", "REP" };
+#ifdef USE_LIBDFT_TAG_SET_FDOFF
+typedef std::map<tag_traits<tag_t>::inner_type, range_info_t> range_map_t;
+#endif
 
 namespace PROVLOG {
 
@@ -115,7 +117,10 @@ static inline void exec(const std::string & exename, pid_t pid) {
 	rawProvStream << "x:" << pid << ":" << exename << std::endl;
 }
 
+#ifdef USE_LIBDFT_TAG_BITSET
 // used for DLIBDFT_TAG_TYPE=libdft_tag_bitset
+// cpp doesn't support string comparison in conditionals
+// define this guard macro at the location of use
 static inline void write(const ufd_t ufd_origin, const ufd_t ufd_dest, const off_t write_begin, const off_t length) {
 	const char *range_type = length > 1 ? range_type_strings[range_info_t::REP] : range_type_strings[range_info_t::NONE];
 	rawProvStream << "w:" << range_type <<
@@ -123,25 +128,30 @@ static inline void write(const ufd_t ufd_origin, const ufd_t ufd_dest, const off
 		":ufd" << ufd_origin << ":" << 0 <<
 		":" << length << std::endl;
 }
+#endif
 
+#ifdef USE_LIBDFT_TAG_SET_FDOFF
 // used for DLIBDFT_TAG_TYPE=libdft_tag_set_fdoff
-// static inline void PROVLOG_WRITE_RANGE(const ufd_t ofd, const off_t write_begin, const range_map_t::key_type last, const range_map_t::mapped_type & info) {
-	// switch(info.type) {
-	// 	case range_info_t::SEQ:
-	// 		rawProvStream << "w:" << range_type_strings[info.type] <<
-	// 			":ufd" << ofd << ":" << (write_begin+info.start) <<
-	// 			":ufd" << last.first << ":" << (last.second-(info.length-1)) << 
-	// 			":" << info.length << std::endl;
-	// 		break;
-	// 	case range_info_t::NONE:
-	// 	case range_info_t::REP:
-	// 		rawProvStream << "w:" << range_type_strings[info.type] <<
-	// 			":ufd" << ofd << ":" << (write_begin+info.start) <<
-	// 			":ufd" << last.first << ":" << last.second << 
-	// 			":" << info.length << std::endl;
-	// 		break;
-	// }
-// }
+// cpp doesn't support string comparison in conditionals
+// define this guard macro at the location of use
+static inline void write_range(const ufd_t ofd, const off_t write_begin, const range_map_t::key_type last, const range_map_t::mapped_type & info) {
+	switch(info.type) {
+		case range_info_t::SEQ:
+			rawProvStream << "w:" << range_type_strings[info.type] <<
+				":ufd" << ofd << ":" << (write_begin+info.start) <<
+				":ufd" << last.first << ":" << (last.second-(info.length-1)) << 
+				":" << info.length << std::endl;
+			break;
+		case range_info_t::NONE:
+		case range_info_t::REP:
+			rawProvStream << "w:" << range_type_strings[info.type] <<
+				":ufd" << ofd << ":" << (write_begin+info.start) <<
+				":ufd" << last.first << ":" << last.second << 
+				":" << info.length << std::endl;
+			break;
+	}
+}
+#endif
 
 } // namespace PROVLOG
 

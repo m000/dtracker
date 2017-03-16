@@ -11,6 +11,8 @@
 #include "tagmap.h"
 #include "pin.H"
 
+#define USE_LIBDFT_TAG_SET_FDOFF
+#include "provlog.H"
 #include "dtracker.H"
 #include "osutils.H"
 
@@ -95,7 +97,7 @@ void post_write_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 
 	LOG("OK    " _CALL_LOG_STR + "\n");
 
-	const ufd_t ufd = ufdmap.get(_FD);
+	const PROVLOG::ufd_t ufd = PROVLOG::ufdmap[_FD];
 	off_t write_begin;
 	range_map_t ranges;
 	range_map_t ranges_prev;
@@ -203,7 +205,7 @@ void post_write_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 
 		//dump output for pattern sequences that were broken
 		for (auto &tm : ranges_prev)
-			PROVLOG_WRITE_RANGE(ufd, write_begin, tm.first, tm.second);
+			PROVLOG::write_range(ufd, write_begin, tm.first, tm.second);
 
 		// swap the two range sets and clear the ranges for next iteration
 		ranges.swap(ranges_prev);
@@ -213,7 +215,7 @@ void post_write_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 
 	//dump the remaining pattern sequences
 	for (auto &tm : ranges_prev)
-		PROVLOG_WRITE_RANGE(ufd, write_begin, tm.first, tm.second);
+		PROVLOG::write_range(ufd, write_begin, tm.first, tm.second);
 }
 #define UNDEF_SYSCALL_WRITE
 #include "hooks/syscall_args.h"

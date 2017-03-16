@@ -8,6 +8,7 @@
 #include "tagmap.h"
 #include "pin.H"
 
+#include "provlog.H"
 #include "dtracker.H"
 #include "osutils.H"
 
@@ -33,7 +34,7 @@ void post_read_hook<libdft_tag_set_fdoff>(syscall_ctx_t *ctx) {
 
 	if (fdset.find(fd) != fdset.end()) {
 		/* set tags on read bytes */
-		const ufd_t ufd = ufdmap.get(fd);
+		const PROVLOG::ufd_t ufd = PROVLOG::ufdmap[fd];
 		off_t read_offset_start = 0;
 		size_t i = 0;
 

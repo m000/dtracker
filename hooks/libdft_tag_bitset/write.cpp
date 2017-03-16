@@ -12,6 +12,7 @@
 #include "tagmap.h"
 #include "pin.H"
 
+#define USE_LIBDFT_TAG_BITSET
 #include "provlog.H"
 #include "dtracker.H"
 #include "osutils.H"
